@@ -1,0 +1,6 @@
+#ifndef EMU_DEFINITION_H
+#define EMU_DEFINITION_H
+
+
+
+#endif //EMU_DEFINITION_H

@@ -1,4 +1,5 @@
 #include "gui/main_window.h"
+#include "core/emu_test.h"
 
 //  RAYLIB INCLUDE
 #include "raylib.h"
@@ -44,7 +45,7 @@ int32_t main_window(void) {
                     menu_state = init;
                 }
 
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-350, 200, 30 }, GuiIconText(ICON_TOOLS, "DEBUG"))) {
+                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-350, 200, 30 }, GuiIconText(ICON_TOOLS, "DEBUG EMU"))) {
                     menu_state = debug;
                 }
 
@@ -69,6 +70,10 @@ int32_t main_window(void) {
 
             case (debug):
                 DrawRectangle(0, 0, window_width, window_height, Fade(RAYWHITE, 0.2f));
+                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
+                    menu_state = normal;
+                }
+                //emu_test();
                 break;
 
             default:
