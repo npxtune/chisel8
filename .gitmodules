@@ -1,0 +1,9 @@
+[submodule "external/raylib-stable"]
+	path = external/raylib-stable
+	url = https://github.com/npxtune/raylib-stable.git
+[submodule "external/raygui-stable"]
+	path = external/raygui-stable
+	url = https://github.com/npxtune/raygui-stable.git
+[submodule "external/angle"]
+	path = external/angle
+	url = https://chromium.googlesource.com/angle/angle

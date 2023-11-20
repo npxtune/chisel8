@@ -1,0 +1,33 @@
+#   SPECIFY CMAKE VERSION AND PROJECT NAME
+cmake_minimum_required(VERSION 3.27)
+project(chisel8 C)
+
+#   SET C STANDARD, COMPILER AND OPENGL VERSION
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_CXX_COMPILER clang)
+set(OPENGL_VERSION "ES 2.0")
+
+#   DEFINE MAIN BINARY
+file(GLOB_RECURSE SOURCES "src/*/*.c")
+add_executable(${PROJECT_NAME} src/main.c ${SOURCES})
+
+
+#   ADD SUBDIRECTORIES AND GIT SUBMODULES
+add_subdirectory(external/raylib-stable)    #   CUSTOM RAYLIB REPO - CURRENT STABLE
+add_subdirectory(external/raygui-stable)    #   CUSTOM RAYGUI REPO - CURRENT STABLE + CMakeList FILE
+
+#   DEFINE ANGLE BUILD DIRECTORIES AND LIBRARIES
+set(ANGLE_LIBRARY_DIR external/angle/out/Release)
+find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
+find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+
+#   TARGET INCLUDE DIRECTORIES FOR RAYLIB, RAYGUI AND ANGLE
+target_include_directories(${PROJECT_NAME} PRIVATE external/raylib-stable/src)  #   RAYLIB INCLUDE DIR
+target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/src)  #   RAYGUI INCLUDE DIR
+target_include_directories(${PROJECT_NAME} PRIVATE external/angle/include)      #   ANGLE  INCLUDE DIR
+
+#   ADD SRC AND INCLUDE DIRECTORIES
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+#   LINK LIBRARIES INTO BINARY
+target_link_libraries(${PROJECT_NAME} raylib raygui ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
