@@ -1,6 +1,7 @@
-#include "gui/gui_startup.h"
+#include <stdint.h>
+#include "gui/main_window.h"
 
-int main() {
-    startup_window();
+int32_t main(void) {
+    main_window();
     return 0;
 }
