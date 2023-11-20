@@ -69,11 +69,8 @@ int32_t main_window(void) {
                 break;
 
             case (debug):
-                DrawRectangle(0, 0, window_width, window_height, Fade(RAYWHITE, 0.2f));
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
-                    menu_state = normal;
-                }
-                //emu_test();
+                while (emu_test() != 0) {}
+                menu_state = normal;
                 break;
 
             default:
