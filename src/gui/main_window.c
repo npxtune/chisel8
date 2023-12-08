@@ -1,6 +1,6 @@
 #include "gui/main_window.h"
 #include "core/emu_test.h"
-#include "version.h"
+#include "gui/version.h"
 
 //  RAYLIB INCLUDE
 #include "raylib.h"

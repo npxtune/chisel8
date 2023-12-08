@@ -17,7 +17,7 @@ execute_process(
 
 # SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
 set(VERSION "${GIT_REF}")
-configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_SOURCE_DIR}/include/version.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/include/gui/version.h.in ${CMAKE_SOURCE_DIR}/include/gui/version.h @ONLY)
 
 #   DEFINE MAIN BINARY
 file(GLOB_RECURSE CORE "src/core/*.c")

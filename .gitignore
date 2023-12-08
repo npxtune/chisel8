@@ -5,6 +5,9 @@ cmake-build-release
 .DS_Storage
 .idea/.DS_Storage
 
+# dynamic version.h
+include/gui/version.h
+
 # Prerequisites
 *.d
 

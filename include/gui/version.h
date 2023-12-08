@@ -4,4 +4,4 @@
 
 #endif //VERSION_H
 
-#define VERSION "3b8ed33-dirty"
+#define VERSION "d35329b-dirty"
