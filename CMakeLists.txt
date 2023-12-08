@@ -5,11 +5,22 @@ project(chisel8 C)
 #   SET C STANDARD, COMPILER AND OPENGL VERSION
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_COMPILER clang)
-set(OPENGL_VERSION "ES 2.0")
+set(OPENGL_VERSION "ES 2.0")    #   ANGLE SUPPORT
+
+# OBTAIN GIT REF STRING
+execute_process(
+        COMMAND git describe --abbrev=7 --dirty --always --tags
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_REF
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
+set(VERSION "${GIT_REF}")
+configure_file(${CMAKE_SOURCE_DIR}/include/version.h.in ${CMAKE_SOURCE_DIR}/include/version.h @ONLY)
 
 #   DEFINE MAIN BINARY
 file(GLOB_RECURSE CORE "src/core/*.c")
-file(GLOB_RECURSE EMU "src/emu/*.c")
 file(GLOB_RECURSE GUI "src/gui/*.c")
 file(GLOB_RECURSE MAIN "src/main.c")
 add_executable(${PROJECT_NAME} ${MAIN} ${CORE} ${EMU} ${GUI})
@@ -33,3 +44,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/styles
 
 #   LINK LIBRARIES INTO BINARY
 target_link_libraries(${PROJECT_NAME} raylib raygui ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
+MESSAGE("-- GIT: ${GIT_REF}")

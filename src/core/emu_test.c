@@ -6,8 +6,8 @@
 int32_t emu_test(void) {
     while (!WindowShouldClose()) {
         BeginDrawing();
-        DrawFPS(2,2);
-        DrawText("EMU TEST", 100, 2, 20, RAYWHITE);
+        DrawText(TextFormat("FPS: %d", GetFPS()),10, 5, 20, RAYWHITE);
+        DrawText("| EMU TEST", 100, 5, 20, RAYWHITE);
         ClearBackground(BLACK);
         EndDrawing();
     }
