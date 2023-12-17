@@ -8,6 +8,9 @@ cmake-build-release
 # dynamic version.h
 include/gui/version.h
 
+# rom directory
+roms/*
+
 # Prerequisites
 *.d
 

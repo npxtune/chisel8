@@ -72,13 +72,38 @@ int32_t main_window(void) {
             /*-------------------------------------------------------------------------------------------------------------*/
 
             case (init):
+                //  TODO: Put this into a separate source file
                 DrawRectangle(0, 0, window_width, window_height, Fade(RAYWHITE, 0.2f));
                 DrawText("Please drag a ROM file into the window", window_width-512*2-100, window_height-256*2+100, 50, RAYWHITE);
 
                 if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
                     menu_state = normal;
                 }
-                break;
+                if (IsFileDropped()) {
+                    FilePathList droppedFiles = LoadDroppedFiles();
+                    if ((droppedFiles.count == 1 && IsFileExtension(droppedFiles.paths[0], ".ch8"))) {
+                        FILE *file = fopen(droppedFiles.paths[0], "rb");
+                        if (file == NULL) {
+                            printf("Could not open file!\n");
+                            break;
+                        }
+                        unsigned char buffer[10];
+                        printf("INFO: ROM contents: \n");
+                        while (fread(buffer, 1, sizeof(buffer), file) > 0) {
+                            for (int32_t i = 0; i < sizeof(buffer); i++) {
+                                printf("%02x ", buffer[i]);
+                            }
+                            printf("\n");
+                        }
+                        fclose(file);
+                    }
+                    else {
+                        printf("INFO: Invalid file format, please load a valid Chip-8 ROM!\n");
+                    }
+                    UnloadDroppedFiles(droppedFiles);
+                    printf("INFO: Unloaded file\n");
+                }
+                    break;
 
             /*-------------------------------------------------------------------------------------------------------------*/
 
