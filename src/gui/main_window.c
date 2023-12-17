@@ -80,18 +80,23 @@ int32_t main_window(void) {
                     menu_state = normal;
                 }
                 if (IsFileDropped()) {
-                    FilePathList droppedFiles = LoadDroppedFiles();
-                    if ((droppedFiles.count == 1 && IsFileExtension(droppedFiles.paths[0], ".ch8"))) {
-                        FILE *file = fopen(droppedFiles.paths[0], "rb");
+                    FilePathList dropped_file = LoadDroppedFiles();
+                    if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
+                        FILE *file = fopen(dropped_file.paths[0], "rb");
                         if (file == NULL) {
                             printf("Could not open file!\n");
                             break;
                         }
-                        unsigned char buffer[10];
+                        unsigned char buffer[16];
+                        int32_t line = 0;
+                        size_t bytes;
                         printf("INFO: ROM contents: \n");
-                        while (fread(buffer, 1, sizeof(buffer), file) > 0) {
-                            for (int32_t i = 0; i < sizeof(buffer); i++) {
-                                printf("%02x ", buffer[i]);
+                        while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+                            for (int32_t i = 0; i < bytes; i+=2) {
+                                if (i+10 % 10 == 0) {
+                                    printf("%04x\t", line++);
+                                }
+                                printf("%02x%02x ", buffer[i+1], buffer[i]);
                             }
                             printf("\n");
                         }
@@ -100,7 +105,7 @@ int32_t main_window(void) {
                     else {
                         printf("INFO: Invalid file format, please load a valid Chip-8 ROM!\n");
                     }
-                    UnloadDroppedFiles(droppedFiles);
+                    UnloadDroppedFiles(dropped_file);
                     printf("INFO: Unloaded file\n");
                 }
                     break;
