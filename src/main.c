@@ -1,6 +1,6 @@
 #include "gui/main_window.h"
 
-int32_t main(void) {
+int main(void) {
     main_window();
     return 0;
 }

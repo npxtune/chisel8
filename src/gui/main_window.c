@@ -1,13 +1,14 @@
-#include "gui/main_window.h"
-#include "core/emu_test.h"
-#include "gui/version.h"
-
 //  RAYLIB INCLUDE
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 
 #include "raygui.h"
 #include "dark/style_dark.h"
+
+#include "gui/main_window.h"
+#include "core/emu_test.h"
+#include "core/emu_file.h"
+#include "gui/version.h"
 
 // DEFINE GLOBAL VARIABLES
 #define WINDOW_TITLE "chisel8-emu | version: "
@@ -79,35 +80,7 @@ int32_t main_window(void) {
                 if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
                     menu_state = normal;
                 }
-                if (IsFileDropped()) {
-                    FilePathList dropped_file = LoadDroppedFiles();
-                    if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
-                        FILE *file = fopen(dropped_file.paths[0], "rb");
-                        if (file == NULL) {
-                            printf("Could not open file!\n");
-                            break;
-                        }
-                        unsigned char buffer[16];
-                        int32_t line = 0;
-                        size_t bytes;
-                        printf("INFO: ROM contents: \n");
-                        while ((bytes = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-                            for (int32_t i = 0; i < bytes; i+=2) {
-                                if (i+10 % 10 == 0) {
-                                    printf("%04x\t", line++);
-                                }
-                                printf("%02x%02x ", buffer[i+1], buffer[i]);
-                            }
-                            printf("\n");
-                        }
-                        fclose(file);
-                    }
-                    else {
-                        printf("INFO: Invalid file format, please load a valid Chip-8 ROM!\n");
-                    }
-                    UnloadDroppedFiles(dropped_file);
-                    printf("INFO: Unloaded file\n");
-                }
+                    drop_file();
                     break;
 
             /*-------------------------------------------------------------------------------------------------------------*/
@@ -127,6 +100,5 @@ int32_t main_window(void) {
         EndDrawing();
     }
     CloseWindow();
-
     return 0;
 }
