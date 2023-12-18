@@ -7,7 +7,7 @@
 
 #include "gui/main_window.h"
 #include "core/emu_test.h"
-#include "core/emu_file.h"
+#include "core/emu_init.h"
 #include "gui/version.h"
 
 // DEFINE GLOBAL VARIABLES
@@ -73,15 +73,20 @@ int32_t main_window(void) {
             /*-------------------------------------------------------------------------------------------------------------*/
 
             case (init):
-                //  TODO: Put this into a separate source file
                 DrawRectangle(0, 0, window_width, window_height, Fade(RAYWHITE, 0.2f));
                 DrawText("Please drag a ROM file into the window", window_width-512*2-100, window_height-256*2+100, 50, RAYWHITE);
 
                 if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
                     menu_state = normal;
-                }
-                    drop_file();
                     break;
+                }
+                if (IsFileDropped()) {
+                    while (emu_init() != 0) {
+                        EndDrawing();
+                    }
+                    menu_state = normal;
+                }
+                break;
 
             /*-------------------------------------------------------------------------------------------------------------*/
 

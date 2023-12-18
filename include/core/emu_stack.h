@@ -1,6 +1,5 @@
 
-#ifndef CHISEL8_EMU_STACK_H
-#define CHISEL8_EMU_STACK_H
+#pragma once
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -46,5 +45,3 @@ bool stack_empty(Stack stack) {
     }
     return false;
 }
-
-#endif //CHISEL8_EMU_STACK_H

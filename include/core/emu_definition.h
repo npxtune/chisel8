@@ -1,7 +1,4 @@
-#ifndef EMU_DEFINITION_H
-#define EMU_DEFINITION_H
-
-#include <stdint.h>
+#pragma once
 
 #define RAM_SIZE 4096
 #define FONT_SIZE 80
@@ -28,8 +25,3 @@ static uint8_t FONT[FONT_SIZE] = {
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
-
-
-
-
-#endif //EMU_DEFINITION_H

@@ -1,7 +1,5 @@
 #include "core/emu_test.h"
-#include "core/emu_stack.h"
 #include "raylib.h"
-#include <stdio.h>
 
 int32_t emu_test(void) {
     while (!WindowShouldClose()) {

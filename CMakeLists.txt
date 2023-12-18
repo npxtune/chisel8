@@ -24,7 +24,6 @@ file(GLOB_RECURSE CORE "src/core/*.c")
 file(GLOB_RECURSE GUI "src/gui/*.c")
 file(GLOB_RECURSE MAIN "src/main.c")
 add_executable(${PROJECT_NAME} ${MAIN} ${CORE} ${EMU} ${GUI})
-
 #   ADD SRC AND INCLUDE DIRECTORIES
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
