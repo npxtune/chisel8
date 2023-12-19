@@ -11,10 +11,10 @@ void gui_load_file(uint8_t *RAM) {
         }
         size_t bytes;
         printf("EMU_FILE: Loading ROM into RAM:\n");
-        if ((bytes = fread(RAM, 1, RAM_SIZE, file)) > 0) {
-            for (int32_t i = 0; i < bytes; i+=2) {
+        if ((bytes = fread(RAM+0x200, 1, RAM_SIZE, file)) > 0) {
+            for (int32_t i = 0x200; i < bytes+0x200; i+=2) {
                 if (i % 16 == 0) {
-                    printf("%04x\t", i == 0 ? 0 : i/16);
+                    printf("0x%03x\t", i == 0 ? 0 : i);
                 }
                 printf("%02x%02x ", RAM[i], RAM[i+1]);
                 if ((i+2) % 16 == 0) {

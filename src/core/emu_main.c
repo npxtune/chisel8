@@ -1,8 +1,9 @@
 #include "core/emu_main.h"
 
+uint8_t DELAY = 0, SOUND = 0; // Delay and sound timers
 uint8_t RAM[RAM_SIZE];
 uint16_t STACK[STACK_SIZE];
-uint8_t PC = 0x0;
+uint8_t *PC = &RAM[0x200];
 
 int32_t emu_main(void) {
     printf("===================================================\n");
@@ -16,10 +17,18 @@ int32_t emu_main(void) {
     }
     printf("EMU_MAIN: Cleared STACK\n");
     gui_load_file(RAM);
+    for (int i = 0; i < FONT_SIZE; ++i) {
+        RAM[i + 0x050] = FONT[i];
+    }
+    printf("EMU_MAIN: Loaded FONT SET into RAM\n");
+    printf("EMU_MAIN: Set *PC to Address 0x200 in RAM\n");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
+
+        // MAIN EMU LOOP
+        fetch(&PC);
 
         // Draw Pixels
         for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
@@ -29,7 +38,6 @@ int32_t emu_main(void) {
             }
         }
         DrawText(TextFormat("FPS: %d", GetFPS()),10, 5, 20, WHITE);
-
         EndDrawing();
     }
     printf("EMU_MAIN: Emulation stopped\n");

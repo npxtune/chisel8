@@ -1,6 +1,7 @@
 
 #pragma once
+#include <stdio.h>
 #include <stdint.h>
-uint16_t fetch(const uint16_t *PC);
+void fetch(uint8_t **PC);
 int32_t decode();
 int32_t execute();
