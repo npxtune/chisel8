@@ -1,9 +1,11 @@
 #pragma once
 
 #define RAM_SIZE 4096
+#define STACK_SIZE 16
 #define FONT_SIZE 80
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
+#define DISPLAY_MULTIPLIER 20   // Default window multiplier
 #define REFRESH_RATE 60
 
 // FONT

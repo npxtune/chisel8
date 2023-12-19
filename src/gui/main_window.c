@@ -1,3 +1,5 @@
+#include "gui/main_window.h"
+
 //  RAYLIB INCLUDE
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
@@ -5,35 +7,36 @@
 #include "raygui.h"
 #include "dark/style_dark.h"
 
-#include "gui/main_window.h"
-#include "core/emu_test.h"
-#include "core/emu_init.h"
+#include "core/emu_main.h"
+#include "core/emu_definition.h"
 #include "gui/version.h"
 
 // DEFINE GLOBAL VARIABLES
 #define WINDOW_TITLE "chisel8-emu | version: "
 
-#define CHIP8_RES_WIDTH 64
-#define CHIP8_RES_HEIGHT 32
-
-#define WINDOW_MULTIPLIER 20        // 1440 / 72 = 20
-
-int32_t main_window(void) {
-    const int32_t window_width = CHIP8_RES_WIDTH*WINDOW_MULTIPLIER;
-    const int32_t window_height = CHIP8_RES_HEIGHT*WINDOW_MULTIPLIER;
+void main_window(void) {
+    const int32_t window_width = DISPLAY_WIDTH * DISPLAY_MULTIPLIER;
+    const int32_t window_height = DISPLAY_HEIGHT * DISPLAY_MULTIPLIER;
 
     InitWindow(window_width,window_height,WINDOW_TITLE VERSION);
     GuiLoadStyleDark();
 
-    enum menu_state_counter {normal, options, init, debug};
+    enum menu_state_counter {normal, options, init};
     uint32_t menu_state = normal;
 
-    SetTargetFPS(60);
+    SetTargetFPS(REFRESH_RATE);
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
 
+        if (IsFileDropped()) {  // Initialize Emulation
+            EndDrawing();
+            emu_main();
+            menu_state = normal;
+        }
+
         DrawText(TextFormat("FPS: %d", GetFPS()),10, 5, 20, RAYWHITE);
+        SetWindowTitle(WINDOW_TITLE VERSION, WINDOW_TITLE VERSION);
 
         switch (menu_state) {
             /*-------------------------------------------------------------------------------------------------------------*/
@@ -44,18 +47,14 @@ int32_t main_window(void) {
                     menu_state = init;
                 }
 
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-350, 200, 30 }, GuiIconText(ICON_TOOLS, "DEBUG EMU"))) {
-                    menu_state = debug;
-                }
-
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-300, 200, 30 }, GuiIconText(ICON_GEAR, "Settings"))) {
+                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-340, 200, 30 }, GuiIconText(ICON_GEAR, "Settings"))) {
                     menu_state = options;
                 }
 
                 if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_EXIT, "Quit"))) {
                     EndDrawing();
                     CloseWindow();
-                    return 0;
+                    return;
                 }
                 break;
 
@@ -63,6 +62,7 @@ int32_t main_window(void) {
 
             case (options):
                 // TODO: Call function from options_window source file and actually add options to choose from
+                // TODO: Should allow the user to change the window scaling and other options...
 
                 DrawText("TODO...", window_width-512*2+300, window_height-256*2+100, 50, RAYWHITE);
                 if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_REREDO_FILL, "Return"))) {
@@ -80,30 +80,17 @@ int32_t main_window(void) {
                     menu_state = normal;
                     break;
                 }
-                if (IsFileDropped()) {
-                    while (emu_init() != 0) {
-                        EndDrawing();
-                    }
+                if (IsFileDropped()) {  // Initialize Emulation
+                    EndDrawing();
+                    emu_main();
                     menu_state = normal;
+                    break;
                 }
                 break;
 
             /*-------------------------------------------------------------------------------------------------------------*/
-
-            case (debug):
-                while (emu_test() != 0) {
-                    EndDrawing();
-                }
-                menu_state = normal;
-                break;
-
-            default:
-                CloseWindow();
-                return -1;
-                break;
         }
         EndDrawing();
     }
     CloseWindow();
-    return 0;
 }
