@@ -16,7 +16,11 @@ int32_t emu_main(void) {
         STACK[i] = 0;
     }
     printf("EMU_MAIN: Cleared STACK\n");
-    gui_load_file(RAM);
+    if (gui_load_file(RAM) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
+        printf("EMU_MAIN: Emulation stopped\n");
+        printf("===================================================\n");
+        return -1;
+    }
     for (int i = 0; i < FONT_SIZE; ++i) {
         RAM[i + 0x050] = FONT[i];
     }
@@ -28,7 +32,11 @@ int32_t emu_main(void) {
         ClearBackground(BLACK);
 
         // MAIN EMU LOOP
-        fetch(&PC);
+        if(IsKeyPressed(KEY_SPACE)) {
+            fetch(&PC);
+        }
+        // decode();
+        // execute();
 
         // Draw Pixels
         for (int y = 0; y < DISPLAY_HEIGHT; ++y) {

@@ -1,13 +1,13 @@
 #include "core/emu_file.h"
 
-void gui_load_file(uint8_t *RAM) {
+int32_t gui_load_file(uint8_t *RAM) {
     FilePathList dropped_file = LoadDroppedFiles();
     if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
         SetWindowTitle(GetFileName(*dropped_file.paths), "ROM MODE");
         FILE *file = fopen(dropped_file.paths[0], "rb");
         if (file == NULL) {
             printf("EMU_FILE: Could not open file!\n");
-            return;
+            return -1;
         }
         size_t bytes;
         printf("EMU_FILE: Loading ROM into RAM:\n");
@@ -29,6 +29,9 @@ void gui_load_file(uint8_t *RAM) {
         printf("EMU_FILE: Unloaded file\n");
     } else {
         printf("EMU_FILE: Invalid file format, please load a valid Chip-8 ROM!\n");
+        UnloadDroppedFiles(dropped_file);
+        return -1;
     }
     UnloadDroppedFiles(dropped_file);
+    return 0;
 }

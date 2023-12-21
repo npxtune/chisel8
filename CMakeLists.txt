@@ -5,7 +5,21 @@ project(chisel8 C)
 #   SET C STANDARD, COMPILER AND OPENGL VERSION
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_COMPILER clang)
-set(OPENGL_VERSION "ES 2.0")    #   ANGLE SUPPORT
+
+#   CONFIGURE OPENGL VERSION AND WARNING FOR MACOS ANGLE
+
+if (NOT APPLE)
+    set(OPENGL_VERSION "4.3")
+else ()
+    if (NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0") # USE ANGLE IN CASE OF MACOS >= Mojave
+        MESSAGE(AUTHOR_WARNING "Please consider using ANGLE for increased Graphics performance!")
+endif ()
+    set(OPENGL_VERSION "3.3")
+endif ()
+if (ANGLE)
+    set(OPENGL_VERSION "ES 2.0")    #   ANGLE SUPPORT
+endif ()
+
 
 # OBTAIN GIT REF STRING
 execute_process(
@@ -31,16 +45,25 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 add_subdirectory(external/raylib-stable)    #   CUSTOM RAYLIB REPO - CURRENT STABLE
 add_subdirectory(external/raygui-stable)    #   CUSTOM RAYGUI REPO - CURRENT STABLE + CMakeList FILE
 
-#   DEFINE ANGLE BUILD DIRECTORIES AND LIBRARIES
-set(ANGLE_LIBRARY_DIR external/angle-lib)
-find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
-find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+if (ANGLE)
+    #   DEFINE ANGLE BUILD DIRECTORIES AND LIBRARIES
+    set(ANGLE_LIBRARY_DIR external/angle-lib)
+    find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
+    find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+endif ()
 
 #   TARGET INCLUDE DIRECTORIES FOR RAYLIB, RAYGUI AND ANGLE
 target_include_directories(${PROJECT_NAME} PRIVATE external/raylib-stable/src)  #   RAYLIB INCLUDE DIR
 target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/src)  #   RAYGUI INCLUDE DIR
 target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/styles)
 
-#   LINK LIBRARIES INTO BINARY
-target_link_libraries(${PROJECT_NAME} raylib raygui ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
+if (ANGLE)
+    #   LINK LIBRARIES INTO BINARY WITH ANGLE
+    target_link_libraries(${PROJECT_NAME} raylib raygui ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
+    MESSAGE("-- USING: ANGLE")
+else ()
+    #   LINK LIBRARIES INTO BINARY
+    target_link_libraries(${PROJECT_NAME} raylib raygui)
+    MESSAGE("-- USING: OpenGL ${OPENGL_VERSION}")
+endif ()
 MESSAGE("-- GIT: ${GIT_REF}")
