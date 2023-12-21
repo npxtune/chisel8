@@ -9,7 +9,7 @@ It currently only has a GUI and is able to read in ROM files + prints out their 
 ### *NIX:
 ```zsh
 mkdir build && cd ./build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j 6 # '6' -> How many cores you want to use
 ./chisel8
 ```
