@@ -6,14 +6,12 @@ project(chisel8 C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_COMPILER clang)
 option(ANGLE "Enable ANGLE support")
-#   CONFIGURE OPENGL VERSION AND WARNING FOR MACOS ANGLE
 
+
+#   CONFIGURE DEFAULT OPENGL VERSION
 if (NOT APPLE)
     set(OPENGL_VERSION "4.3")
 else ()
-    if (NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0") # USE ANGLE IN CASE OF MACOS >= Mojave
-        MESSAGE(AUTHOR_WARNING "Please consider using ANGLE for increased Graphics performance!")
-endif ()
     set(OPENGL_VERSION "3.3")
 endif ()
 if (ANGLE)
@@ -29,45 +27,85 @@ execute_process(
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+
 # SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
 if (GIT_REF)
     set(VERSION "${GIT_REF}")
 else ()
     set(VERSION "undefined")
 endif ()
-configure_file(${CMAKE_SOURCE_DIR}/include/gui/version.h.in ${CMAKE_SOURCE_DIR}/include/gui/version.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/include/gui/version.h.in
+        ${CMAKE_SOURCE_DIR}/include/gui/version.h
+        @ONLY
+)
 
-#   DEFINE MAIN BINARY
-file(GLOB_RECURSE CORE "src/core/*.c")
-file(GLOB_RECURSE GUI "src/gui/*.c")
-file(GLOB_RECURSE MAIN "src/main.c")
-add_executable(${PROJECT_NAME} ${MAIN} ${CORE} ${EMU} ${GUI})
-#   ADD SRC AND INCLUDE DIRECTORIES
+
+#   DEFINE SOURCE FILE LOCATIONS + ADD THEM
+file(GLOB_RECURSE CORE "src/core/*.c"
+        GUI "src/gui/*.c"
+        MAIN "src/main.c"
+)
+add_executable(${PROJECT_NAME}
+        ${MAIN}
+        ${CORE}
+        ${EMU}
+        ${GUI}
+)
+
+
+#   ADD INCLUDE DIRS
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
-#   ADD SUBDIRECTORIES AND GIT SUBMODULES
-add_subdirectory(external/raylib-stable)    #   CUSTOM RAYLIB REPO - CURRENT STABLE
-add_subdirectory(external/raygui-stable)    #   CUSTOM RAYGUI REPO - CURRENT STABLE + CMakeList FILE
 
+#   ADD GIT SUBMODULES
+add_subdirectory(external/raylib-stable)     #   CUSTOM RAYLIB REPOS - CURRENT STABLE
+add_subdirectory(external/raygui-stable)
+
+
+#   IF ANGLE:   DEFINE ANGLE DIRECTORY AND LIBRARIES
 if (ANGLE)
-    #   DEFINE ANGLE BUILD DIRECTORIES AND LIBRARIES
     set(ANGLE_LIBRARY_DIR external/angle-lib)
-    find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR})
-    find_library(ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
+    find_library(ANGLE_GLESv2_LIBRARY libGLESv2.dylib PATHS ${ANGLE_LIBRARY_DIR}
+            ANGLE_EGL_LIBRARY libEGL.dylib PATHS ${ANGLE_LIBRARY_DIR})
 endif ()
+
 
 #   TARGET INCLUDE DIRECTORIES FOR RAYLIB, RAYGUI AND ANGLE
-target_include_directories(${PROJECT_NAME} PRIVATE external/raylib-stable/src)  #   RAYLIB INCLUDE DIR
-target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/src)  #   RAYGUI INCLUDE DIR
-target_include_directories(${PROJECT_NAME} PRIVATE external/raygui-stable/styles)
+target_include_directories(${PROJECT_NAME} PRIVATE external/raylib-stable/src   #   RAYLIB INCLUDE DIR
+        ${PROJECT_NAME} PRIVATE external/raygui-stable/src                      #   RAYGUI INCLUDE DIR
+        ${PROJECT_NAME} PRIVATE external/raygui-stable/styles                   #   RAYGUI STYLES DIR
+)
 
+
+#   IF ANGLE:   LINK LIBRARIES INTO BINARY WITH ANGLE
 if (ANGLE)
-    #   LINK LIBRARIES INTO BINARY WITH ANGLE
-    target_link_libraries(${PROJECT_NAME} raylib raygui ${ANGLE_EGL_LIBRARY} ${ANGLE_GLESv2_LIBRARY})
+    target_link_libraries(${PROJECT_NAME}
+            raylib
+            raygui
+            ${ANGLE_EGL_LIBRARY}
+            ${ANGLE_GLESv2_LIBRARY}
+    )
     MESSAGE("-- USING: ANGLE")
+
+
+    #IF NOT ANGLE:  LINK LIBRARIES INTO BINARY
 else ()
-    #   LINK LIBRARIES INTO BINARY
-    target_link_libraries(${PROJECT_NAME} raylib raygui)
+    target_link_libraries(${PROJECT_NAME}
+            raylib
+            raygui
+    )
     MESSAGE("-- USING: OpenGL ${OPENGL_VERSION}")
 endif ()
+
+#   SHOW GITHUB REF STRING
 MESSAGE("-- GIT: ${GIT_REF}")
+
+
+#   WARNINGS IF NO BUILD TYPE DEFINED AND ANGLE MACOS
+if (NOT CMAKE_BUILD_TYPE)
+    MESSAGE(AUTHOR_WARNING "SET A CMAKE BUILD TYPE WITH: '-DCMAKE_BUILD_TYPE='")
+endif ()
+
+if (NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0" AND NOT ANGLE)
+    MESSAGE(AUTHOR_WARNING "Please consider using ANGLE starting with macOS 10.14 (Mojave)!")
+endif ()
