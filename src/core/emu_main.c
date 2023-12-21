@@ -3,7 +3,7 @@
 uint8_t DELAY = 0, SOUND = 0; // Delay and sound timers
 uint8_t RAM[RAM_SIZE];
 uint16_t STACK[STACK_SIZE];
-uint8_t *PC = &RAM[0x200];
+uint8_t *PC;
 
 int32_t emu_main(void) {
     printf("===================================================\n");
@@ -25,6 +25,7 @@ int32_t emu_main(void) {
         RAM[i + 0x050] = FONT[i];
     }
     printf("EMU_MAIN: Loaded FONT SET into RAM\n");
+    PC = &RAM[0x200];
     printf("EMU_MAIN: Set *PC to Address 0x200 in RAM\n");
 
     while (!WindowShouldClose()) {
