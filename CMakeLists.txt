@@ -30,7 +30,11 @@ execute_process(
 )
 
 # SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
-set(VERSION "${GIT_REF}")
+if (GIT_REF)
+    set(VERSION "${GIT_REF}")
+else ()
+    set(VERSION "undefined")
+endif ()
 configure_file(${CMAKE_SOURCE_DIR}/include/gui/version.h.in ${CMAKE_SOURCE_DIR}/include/gui/version.h @ONLY)
 
 #   DEFINE MAIN BINARY

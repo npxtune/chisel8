@@ -36,7 +36,7 @@ void main_window(void) {
         }
 
         DrawText(TextFormat("FPS: %d", GetFPS()),10, 5, 20, RAYWHITE);
-        SetWindowTitle(WINDOW_TITLE VERSION, WINDOW_TITLE VERSION);
+        SetWindowTitle(WINDOW_TITLE VERSION);
 
         switch (menu_state) {
             /*-------------------------------------------------------------------------------------------------------------*/

@@ -3,7 +3,7 @@
 int32_t gui_load_file(uint8_t *RAM) {
     FilePathList dropped_file = LoadDroppedFiles();
     if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
-        SetWindowTitle(GetFileName(*dropped_file.paths), "ROM MODE");
+        SetWindowTitle(GetFileName(*dropped_file.paths));
         FILE *file = fopen(dropped_file.paths[0], "rb");
         if (file == NULL) {
             printf("EMU_FILE: Could not open file!\n");
