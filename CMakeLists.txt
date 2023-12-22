@@ -19,7 +19,7 @@ if (ANGLE)
 endif ()
 
 
-# OBTAIN GIT REF STRING
+#   OBTAIN GIT REF STRING
 execute_process(
         COMMAND git describe --abbrev=7 --dirty --always --tags
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -28,12 +28,11 @@ execute_process(
 )
 
 
-# SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
-if (GIT_REF)
-    set(VERSION "${GIT_REF}")
-else ()
-    set(VERSION "undefined")
+#   SET GIT REF STRING AS VERSION NUMBER IN VERSION.H
+if (NOT GIT_REF)
+    set(GIT_REF "N/A")
 endif ()
+set(VERSION "${GIT_REF}")
 configure_file(${CMAKE_SOURCE_DIR}/include/gui/version.h.in
         ${CMAKE_SOURCE_DIR}/include/gui/version.h
         @ONLY
@@ -88,7 +87,7 @@ if (ANGLE)
     MESSAGE("-- USING: ANGLE")
 
 
-    #IF NOT ANGLE:  LINK LIBRARIES INTO BINARY
+    #   IF NOT ANGLE:  LINK LIBRARIES INTO BINARY
 else ()
     target_link_libraries(${PROJECT_NAME}
             raylib
@@ -106,6 +105,6 @@ if (NOT CMAKE_BUILD_TYPE)
     MESSAGE(AUTHOR_WARNING "SET A CMAKE BUILD TYPE WITH: '-DCMAKE_BUILD_TYPE='")
 endif ()
 
-if (NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0" AND NOT ANGLE)
+if (APPLE AND NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0" AND NOT ANGLE)
     MESSAGE(AUTHOR_WARNING "Please consider using ANGLE starting with macOS 10.14 (Mojave)!")
 endif ()
