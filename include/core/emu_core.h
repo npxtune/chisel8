@@ -2,6 +2,6 @@
 #pragma once
 #include <stdio.h>
 #include <stdint.h>
-void fetch(uint8_t **PC);
-int32_t decode();
-int32_t execute();
+#include "core/emu_definition.h"
+uint16_t fetch(chip8 *system);
+int32_t decode_exec(uint16_t instruction, chip8 *system);

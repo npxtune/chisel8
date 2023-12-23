@@ -1,6 +1,6 @@
 #include "core/emu_file.h"
 
-int32_t gui_load_file(uint8_t *RAM) {
+int32_t gui_load_file(chip8 *system) {
     FilePathList dropped_file = LoadDroppedFiles();
     if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
         SetWindowTitle(GetFileName(*dropped_file.paths));
@@ -10,20 +10,20 @@ int32_t gui_load_file(uint8_t *RAM) {
             return -1;
         }
         size_t bytes;
-        printf("EMU_FILE: Loading ROM into RAM:\n");
-        if ((bytes = fread(RAM+0x200, 1, RAM_SIZE, file)) > 0) {
+        printf("EMU_FILE: Loading ROM into ram:\n");
+        if ((bytes = fread(system->ram+0x200, 1, RAM_SIZE, file)) > 0) {
             for (int32_t i = 0x200; i < bytes+0x200; i+=2) {
                 if (i % 16 == 0) {
-                    printf("0x%03x\t", i == 0 ? 0 : i);
+                    printf("0x%03x\t", i);
                 }
-                printf("%02x%02x ", RAM[i], RAM[i+1]);
+                printf("%02x%02x ", system->ram[i], system->ram[i+1]);
                 if ((i+2) % 16 == 0) {
                     printf("\n");
                 }
             }
-            printf("\nEMU_FILE: ROM was loaded into RAM\n");
+            printf("\nEMU_FILE: ROM was loaded into ram\n");
         } else {
-            printf("EMU_FILE: Could not load ROM into RAM!\n");
+            printf("EMU_FILE: Could not load ROM into ram!\n");
         }
         fclose(file);
         printf("EMU_FILE: Unloaded file\n");

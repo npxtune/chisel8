@@ -1,6 +1,7 @@
 #pragma once
 
 #define RAM_SIZE 4096
+#define REGISTER_SIZE 0x10
 #define STACK_SIZE 16
 #define FONT_SIZE 80
 #define DISPLAY_WIDTH 64
@@ -27,3 +28,12 @@ static uint8_t FONT[FONT_SIZE] = {
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
+
+typedef struct Chip8 {
+    uint8_t delay, sound; // Delay and sound timers
+    uint8_t ram[RAM_SIZE], reg[REGISTER_SIZE];
+    uint16_t stack[STACK_SIZE];
+    uint16_t pc, I, opcode;
+
+    uint8_t pixels[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+} chip8;
