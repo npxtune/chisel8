@@ -5,9 +5,9 @@ Compact Hexadecimal Interpretive Programming – 8-bit (Chip-8 Interpreter), wri
 TODO: Update Feature List
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <img width="1392" alt="Menu" src="https://github.com/npxtune/chisel8/assets/42376598/8b0904e6-fcd9-45c4-b86f-4aa8b66d3da3", style="width: 30%; max-width: 200px;">
-  <img width="1392" alt="IBM LOGO" src="https://github.com/npxtune/chisel8/assets/42376598/0d8103d3-1dfe-4b22-9c7f-8ee36eef8438", style="width: 30%; max-width: 200px;">
-  <img width="1392" alt="Chip-8 TTS LOGO" src="https://github.com/npxtune/chisel8/assets/42376598/d0baf3a1-1352-40e5-9a67-c4a0b36c44bc", style="width: 30%; max-width: 200px;">
+  <img width="1392" alt="Menu" src="https://github.com/npxtune/chisel8/assets/42376598/8b0904e6-fcd9-45c4-b86f-4aa8b66d3da3" style="width: 30%; max-width: 200px;">
+  <img width="1392" alt="IBM LOGO" src="https://github.com/npxtune/chisel8/assets/42376598/0d8103d3-1dfe-4b22-9c7f-8ee36eef8438" style="width: 30%; max-width: 200px;">
+  <img width="1392" alt="Chip-8 TTS LOGO" src="https://github.com/npxtune/chisel8/assets/42376598/d0baf3a1-1352-40e5-9a67-c4a0b36c44bc" style="width: 30%; max-width: 200px;">
 </div>
 
 ---
