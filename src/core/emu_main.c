@@ -31,7 +31,7 @@ int32_t emu_main(void) {
 
     system.delay = 0, system.sound = 0;
 
-    while (!WindowShouldClose()) {
+    while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -42,9 +42,20 @@ int32_t emu_main(void) {
         if (decode_exec(instruction, &system) == -1) {
             return -1;
         }
+
+
+        if(WindowShouldClose()) {
+            EndDrawing();
+            UnloadTexture(system.display);
+            ClearBackground(BLACK);
+            printf("EMU_MAIN: Closing window\n");
+            printf("===================================================\n");
+            return -1;
+        }
         EndDrawing();
     }
     UnloadTexture(system.display);
+    ClearBackground(BLACK);
     printf("EMU_MAIN: Emulation stopped\n");
     printf("===================================================\n");
     return 0;

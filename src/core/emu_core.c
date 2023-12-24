@@ -76,6 +76,7 @@ int32_t decode_exec(uint16_t instruction, chip8 *system) {
                     }
                 }
             }
+            UnloadTexture(system->display);
             system->display = LoadTextureFromImage(chip8_pixels);
             UnloadImage(chip8_pixels);
             break;

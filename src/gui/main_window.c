@@ -31,7 +31,7 @@ void main_window(void) {
 
         if (IsFileDropped()) {  // Initialize Emulation
             EndDrawing();
-            emu_main();
+            if(emu_main() == -1) {break;}
             menu_state = normal;
         }
 
@@ -81,7 +81,7 @@ void main_window(void) {
                 }
                 if (IsFileDropped()) {  // Initialize Emulation
                     EndDrawing();
-                    emu_main();
+                    if(emu_main() == -1) {break;}
                     menu_state = normal;
                     break;
                 }
