@@ -66,6 +66,18 @@ int32_t decode_exec(uint16_t instruction, chip8 *system) {
                     }
                 }
             }
+
+            // Save pixels into a virtual Texture
+            Image chip8_pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, BLACK);
+            for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+                for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+                    if (system->pixels[x][y] == 1) {
+                        ImageDrawPixel(&chip8_pixels, x, y, WHITE);
+                    }
+                }
+            }
+            system->display = LoadTextureFromImage(chip8_pixels);
+            UnloadImage(chip8_pixels);
             break;
 
         default:

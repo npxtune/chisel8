@@ -35,32 +35,16 @@ int32_t emu_main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        // Draw GRID for visual help
-//        for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-//            for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-//                DrawLine(x * DISPLAY_MULTIPLIER, y * DISPLAY_MULTIPLIER, x * DISPLAY_MULTIPLIER, y * DISPLAY_MULTIPLIER + DISPLAY_MULTIPLIER, DARKGRAY);
-//                DrawLine(x * DISPLAY_MULTIPLIER, y * DISPLAY_MULTIPLIER, x * DISPLAY_MULTIPLIER + DISPLAY_MULTIPLIER, y * DISPLAY_MULTIPLIER, DARKGRAY);
-//            }
-//        }
-
-        // Draw Pixels
-        for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-            for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-                if (system.pixels[x][y] == 1) {
-                    DrawRectangle(x * DISPLAY_MULTIPLIER, y * DISPLAY_MULTIPLIER, DISPLAY_MULTIPLIER, DISPLAY_MULTIPLIER, WHITE);
-                }
-            }
-        }
-
-//        DrawText(TextFormat("FPS: %d", GetFPS()),10, 5, 20, WHITE);
+        // Draw Pixels from virtual Texture
+        DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)GetScreenHeight() / (float)system.display.height, WHITE);
 
         uint16_t instruction = fetch(&system);
         if (decode_exec(instruction, &system) == -1) {
             return -1;
-
         }
         EndDrawing();
     }
+    UnloadTexture(system.display);
     printf("EMU_MAIN: Emulation stopped\n");
     printf("===================================================\n");
     return 0;

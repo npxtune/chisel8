@@ -1,5 +1,5 @@
 #pragma once
-
+#include "raylib.h"
 #define RAM_SIZE 4096
 #define REGISTER_SIZE 0xF
 #define STACK_SIZE 16
@@ -36,4 +36,5 @@ typedef struct Chip8 {
     uint16_t pc, I;
 
     uint8_t pixels[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+    Texture2D display;
 } chip8;
