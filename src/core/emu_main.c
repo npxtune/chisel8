@@ -1,6 +1,14 @@
 #include "core/emu_main.h"
 #include "core/emu_definition.h"
 
+void emu_stop(chip8 *system) {
+    EndDrawing();
+    UnloadTexture(system->display);
+    ClearBackground(BLACK);
+    printf("EMU_MAIN: Stopping emulation\n");
+    printf("===================================================\n");
+}
+
 int32_t emu_main(void) {
     chip8 system;
     printf("===================================================\n");
@@ -40,23 +48,16 @@ int32_t emu_main(void) {
 
         uint16_t instruction = fetch(&system);
         if (decode_exec(instruction, &system) == -1) {
+            emu_stop(&system);
             return -1;
         }
 
-
         if(WindowShouldClose()) {
-            EndDrawing();
-            UnloadTexture(system.display);
-            ClearBackground(BLACK);
-            printf("EMU_MAIN: Closing window\n");
-            printf("===================================================\n");
-            return -1;
+            emu_stop(&system);
+            return -2;
         }
         EndDrawing();
     }
-    UnloadTexture(system.display);
-    ClearBackground(BLACK);
-    printf("EMU_MAIN: Emulation stopped\n");
-    printf("===================================================\n");
+    emu_stop(&system);
     return 0;
 }

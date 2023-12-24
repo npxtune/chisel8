@@ -5,3 +5,4 @@
 #include "core/emu_file.h"
 #include "core/emu_core.h"
 int32_t emu_main(void);
+void emu_stop(chip8 *system);
