@@ -12,7 +12,7 @@ TODO: Update Feature List
 
 ---
 # Build instructions:
-### *NIX:
+### MacOS & Linux:
 ```zsh
 mkdir build && cd ./build
 cmake -DCMAKE_BUILD_TYPE=Release ..
