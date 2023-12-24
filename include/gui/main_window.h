@@ -1,2 +1,3 @@
 #pragma once
-void main_window(void);
+#include "gui/options_window.h"
+void main_window(options_config *config);

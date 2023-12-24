@@ -9,7 +9,7 @@ void emu_stop(chip8 *system) {
     printf("===================================================\n");
 }
 
-int32_t emu_main(void) {
+int32_t emu_main(options_config *config) {
     chip8 system;
     printf("===================================================\n");
     printf("EMU_MAIN: Starting Emulation\n");
@@ -47,7 +47,7 @@ int32_t emu_main(void) {
         DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)GetScreenHeight() / (float)system.display.height, WHITE);
 
         uint16_t instruction = fetch(&system);
-        if (decode_exec(instruction, &system) == -1) {
+        if (decode_exec(instruction, &system, config) == -1) {
             emu_stop(&system);
             return -1;
         }

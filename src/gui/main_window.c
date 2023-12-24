@@ -14,11 +14,14 @@
 // DEFINE GLOBAL VARIABLES
 #define WINDOW_TITLE "chisel8-emu | version: "
 
-void main_window(void) {
-    const int32_t window_width = DISPLAY_WIDTH * DISPLAY_MULTIPLIER;
-    const int32_t window_height = DISPLAY_HEIGHT * DISPLAY_MULTIPLIER;
+void main_window(options_config *config) {
+    const int32_t window_width = DISPLAY_WIDTH * config->display_scaling;
+    const int32_t window_height = DISPLAY_HEIGHT * config->display_scaling;
 
     InitWindow(window_width,window_height,WINDOW_TITLE VERSION);
+
+    const float button_width = (float)(window_width/4.8);
+    const float button_x = (float)((float)window_width/2-(window_width/9.6));
     GuiLoadStyleDark();
 
     enum menu_state_counter {normal, options, init};
@@ -31,7 +34,7 @@ void main_window(void) {
 
         if (IsFileDropped()) {  // Initialize Emulation
             EndDrawing();
-            if(emu_main() == -2) {break;}
+            if(emu_main(config) == -2) {break;}
             menu_state = normal;
         }
 
@@ -40,17 +43,17 @@ void main_window(void) {
         switch (menu_state) {
             /*-------------------------------------------------------------------------------------------------------------*/
             case (normal):
-                DrawText("Chisel8 Emulator", window_width/2-40*4, 75, 40, RAYWHITE);
+                DrawText("Chisel8 Emulator", window_width/2-(75*40/20)-10, (window_height/12), 40, RAYWHITE);
 
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-400, 200, 30 }, GuiIconText(ICON_CPU, "Load EMU"))) {
+                if (GuiButton((Rectangle){ button_x, window_height/2-window_height/6-10, button_width, 30 }, GuiIconText(ICON_CPU, "Load EMU"))) {
                     menu_state = init;
                 }
 
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-340, 200, 30 }, GuiIconText(ICON_GEAR, "Settings"))) {
+                if (GuiButton((Rectangle){ button_x, window_height/2-window_height/16, button_width, 30 }, GuiIconText(ICON_GEAR, "Settings"))) {
                     menu_state = options;
                 }
 
-                if (GuiButton((Rectangle){ (window_width+300)/3, window_height-100, 200, 30 }, GuiIconText(ICON_EXIT, "Quit"))) {
+                if (GuiButton((Rectangle){ button_x, window_height-(window_height/6), button_width, 30 }, GuiIconText(ICON_EXIT, "Quit"))) {
                     EndDrawing();
                     CloseWindow();
                     return;
@@ -81,7 +84,7 @@ void main_window(void) {
                 }
                 if (IsFileDropped()) {  // Initialize Emulation
                     EndDrawing();
-                    if(emu_main() == -2) {break;}
+                    if(emu_main(config) == -2) {break;}
                     menu_state = normal;
                     break;
                 }

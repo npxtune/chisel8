@@ -7,7 +7,7 @@ uint16_t fetch(chip8 *system) {
     return instruction;
 }
 
-int32_t decode_exec(uint16_t instruction, chip8 *system) {
+int32_t decode_exec(uint16_t instruction, chip8 *system, options_config *config) {
     uint8_t X = (instruction >> 8) & 0b01;
     uint8_t Y =  (instruction >> 4) & 0b01;
     uint8_t N1 = instruction & 0xF;
@@ -68,11 +68,11 @@ int32_t decode_exec(uint16_t instruction, chip8 *system) {
             }
 
             // Save pixels into a virtual Texture
-            Image chip8_pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, BLACK);
+            Image chip8_pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
             for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
                 for (int x = 0; x < DISPLAY_WIDTH; ++x) {
                     if (system->pixels[x][y] == 1) {
-                        ImageDrawPixel(&chip8_pixels, x, y, WHITE);
+                        ImageDrawPixel(&chip8_pixels, x, y, config->pixel_color);
                     }
                 }
             }
