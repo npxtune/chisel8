@@ -1,68 +1,167 @@
 #include "core/emu_core.h"
 
-uint16_t fetch(chip8 *system) {
-    uint16_t instruction = (uint8_t) system->ram[system->pc++];
-    instruction <<= 8;
-    instruction += system->ram[system->pc++];
-    return instruction;
+int32_t fetch(chip8 *system) {
+    system->opcode = (uint8_t) system->ram[system->pc++];
+    system->opcode <<= 8;
+    system->opcode += system->ram[system->pc++];
+    return 0;
 }
 
-int32_t decode_exec(uint16_t instruction, chip8 *system, options_config *config) {
-    uint8_t X = (instruction >> 8) & 0b01;
-    uint8_t Y =  (instruction >> 4) & 0b01;
-    uint8_t N1 = instruction & 0xF;
-    uint8_t N2 = instruction & 0xFF;
-    uint16_t N3 = instruction & 0xFFF;
+int32_t decode_exec(chip8 *emu, options_config *config) {
+    uint8_t X = (emu->opcode >> 8) & 0b01;
+    uint8_t Y = (emu->opcode >> 4) & 0b01;
+    uint8_t N1 = emu->opcode & 0xF;
+    uint8_t N2 = emu->opcode & 0xFF;
+    uint16_t N3 = emu->opcode & 0xFFF;
 
-    switch (instruction >> 12) {
+    switch (emu->opcode >> 12) {
         case (0x0):
-            if (instruction == 0xe0) {
-                printf("\nEMU_CORE: Fetched: %x\n", instruction);
-                printf("EMU_CORE: CLEAR SCREEN\n");
+            if (emu->opcode == 0xe0) {
+//                printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+//                printf("EMU_CORE: CLEAR SCREEN\n");
                 for (int x = 0; x < DISPLAY_WIDTH; ++x) {
                     for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-                        system->pixels[x][y] = 0;
+                        emu->pixels[x][y] = 0;
                     }
                 }
+            } else if (emu->opcode == 0xee) {
+                emu->pc = emu->stack[emu->i_stack];
+                emu->stack[emu->i_stack] = 0;
+                emu->i_stack -= 1;
             }
             break;
         case (0x1):
             //printf("jump\n\tPC->%03x\n", N3);
-            system->pc = N3;
+            emu->pc = N3;
+            break;
+        case (0x2):
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+            emu->stack[emu->i_stack] = emu->pc;
+            emu->i_stack += 1;
+            emu-> pc = N3;
+            break;
+        case (0x3):
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+            if (emu->reg[X] == N2) {
+                emu->pc+=2;
+            }
+            break;
+        case (0x4):
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+            if (emu->reg[X] != N2) {
+                emu->pc+=2;
+            }
+            break;
+        case (0x5):
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+            if(emu->reg[X] == emu->reg[Y]) {
+                emu->pc+=2;
+            }
             break;
         case (0x6):
-            printf("\nEMU_CORE: Fetched: %x\n", instruction);
-            printf("EMU_CORE: set register VX\n\tX->%x\n\tVal->%02x\n", X , N2);
-            system->reg[X] = N2;
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+//            printf("EMU_CORE: set register VX\n\tX->%x\n\tVal->%02x\n", X , N2);
+            emu->reg[X] = N2;
             break;
         case (0x7):
-            printf("\nEMU_CORE: Fetched: %x\n", instruction);
-            printf("EMU_CORE: add value to register VX\n\tX->%x\n\tVal->%02x\n", X, N2);
-            system->reg[X] += N2;
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+//            printf("EMU_CORE: add value to register VX\n\tX->%x\n\tVal->%02x\n", X, N2);
+            emu->reg[X] += N2;
+            break;
+            
+        case (0x8):
+            switch (N1) {
+                case (0x0):
+                    emu->reg[X] = emu->reg[Y];
+                    break;
+                case (0x1):
+                    emu->reg[X] = (emu->reg[X] | emu-> reg[Y]);
+                    break;
+                case (0x2):
+                    emu->reg[X] = (emu->reg[X] & emu-> reg[Y]);
+                    break;
+                case (0x3):
+                    emu->reg[X] = (emu->reg[X] ^ emu-> reg[Y]);
+                    break;
+                case (0x4):
+                    emu->reg[0xF] = 0;
+                    if (emu->reg[X] + emu->reg[Y] > 255) {
+                        emu->reg[0xF] = 1;
+                    }
+                    emu->reg[X] = emu->reg[X] + emu->reg[Y];
+                    break;
+                case (0x5):
+                    emu->reg[0xF] = 1;
+                    if (emu->reg[X] - emu->reg[Y] < 0) {
+                        emu->reg[0xF] = 0;
+                    }
+                    emu->reg[X] = emu->reg[X] - emu->reg[Y];
+                    break;
+                case (0x7):
+                    emu->reg[0xF] = 1;
+                    if (emu->reg[Y] - emu->reg[X] < 0) {
+                        emu->reg[0xF] = 0;
+                    }
+                    emu->reg[X] = emu->reg[Y] - emu->reg[X];
+                    break;
+                case (0x8):
+                    emu->reg[0xF] = 0;
+                    emu->reg[X] = emu->reg[Y];
+                    if ((emu->reg[X] & 1) == 1) {
+                        emu->reg[0xF] = 1;
+                    }
+                    emu->reg[X] >>= 1;
+                    break;
+                case (0xe):
+                    emu->reg[0xF] = 0;
+                    emu->reg[X] = emu->reg[Y];
+                    if ((emu->reg[X] & 1) == 1) {
+                        emu->reg[0xF] = 1;
+                    }
+                    emu->reg[X] <<= 1;
+                    break;
+
+                default:
+                    fprintf(stderr, "%s", "EMU_CORE: FATAL ERROR -> COULD NOT DECODE INSTRUCTION!\n");
+                    return -1;
+            }
+            break;
+            
+        case (0x9):
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+            if(emu->reg[X] != emu->reg[Y]) {
+                emu->pc+=2;
+            }
             break;
         case (0xa):
-            printf("\nEMU_CORE: Fetched: %x\n", instruction);
-            printf("EMU_CORE: set index register I\n\tI->%03x\n", N3);
-            system->I = N3;
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+//            printf("EMU_CORE: set index register I\n\tI->%03x\n", N3);
+            emu->I = N3;
+            break;
+        case (0xb):
+            emu->pc = N3 + emu->reg[0x0];
+            break;
+        case (0xc):
+            emu->reg[X] = GetRandomValue(0, 255) & N2;
             break;
 
         case (0xd):
-            printf("\nEMU_CORE: Fetched: %x\n", instruction);
-            printf("EMU_CORE: display/draw\n\tX->%x\n\tY->%x\n\tN1->%x\n", X, Y, N1);
+//            printf("\nEMU_CORE: Fetched: %x\n", emu->opcode);
+//            printf("EMU_CORE: display/draw\n\tX->%x\n\tY->%x\n\tN1->%x\n", X, Y, N1);
+            0;
+            uint8_t vx = emu->reg[X];
+            uint8_t vy = emu->reg[Y];
 
-            uint8_t vx = system->reg[X];
-            uint8_t vy = system->reg[Y];
-
-            system->reg[0xF] = 0;
+            emu->reg[0xF] = 0;
 
             for (int y = 0; y < N1; ++y) {
-                uint8_t pixel = system->ram[system->I + y];
+                uint8_t pixel = emu->ram[emu->I + y];
                 for (int x = 0; x < 8; ++x) {
                     if ((pixel & (0x80 >> x)) != 0) {
-                        if (system->pixels[vx+x][vy+y] == 1) {
-                            system->reg[0xF] = 1;
+                        if (emu->pixels[vx + x][vy + y] == 1) {
+                            emu->reg[0xF] = 1;
                         }
-                        system->pixels[vx+x][vy+y] ^= 1;
+                        emu->pixels[vx + x][vy + y] ^= 1;
                     }
                 }
             }
@@ -71,13 +170,13 @@ int32_t decode_exec(uint16_t instruction, chip8 *system, options_config *config)
             Image chip8_pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
             for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
                 for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-                    if (system->pixels[x][y] == 1) {
+                    if (emu->pixels[x][y] == 1) {
                         ImageDrawPixel(&chip8_pixels, x, y, config->pixel_color);
                     }
                 }
             }
-            UnloadTexture(system->display);
-            system->display = LoadTextureFromImage(chip8_pixels);
+            UnloadTexture(emu->display);
+            emu->display = LoadTextureFromImage(chip8_pixels);
             UnloadImage(chip8_pixels);
             break;
 

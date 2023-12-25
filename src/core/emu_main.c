@@ -20,6 +20,7 @@ int32_t emu_main(options_config *config) {
     for (int i = 0; i < STACK_SIZE; ++i) {
         system.stack[i] = 0;
     }
+    system.i_stack = 0;
     printf("EMU_MAIN: Cleared stack\n");
     for (int i = 0; i < REGISTER_SIZE; ++i) {
         system.reg[i] = 0;
@@ -44,10 +45,13 @@ int32_t emu_main(options_config *config) {
         ClearBackground(BLACK);
 
         // Draw Pixels from virtual Texture
-        DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)GetScreenHeight() / (float)system.display.height, WHITE);
+        DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
 
-        uint16_t instruction = fetch(&system);
-        if (decode_exec(instruction, &system, config) == -1) {
+        if (fetch(&system) == -1) {
+            emu_stop(&system);
+            return -1;
+        }
+        if (decode_exec(&system, config) == -1) {
             emu_stop(&system);
             return -1;
         }
@@ -58,6 +62,7 @@ int32_t emu_main(options_config *config) {
         }
         EndDrawing();
     }
+    UnloadTexture(system.display);
     emu_stop(&system);
     return 0;
 }

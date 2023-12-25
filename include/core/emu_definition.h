@@ -6,7 +6,6 @@
 #define FONT_SIZE 80
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
-#define DISPLAY_MULTIPLIER 20   // Default window multiplier
 #define REFRESH_RATE 60
 
 // FONT
@@ -30,10 +29,11 @@ static uint8_t FONT[FONT_SIZE] = {
 };
 
 typedef struct Chip8 {
-    uint8_t delay, sound; // Delay and sound timers
+    uint8_t delay, sound, i_stack; // Delay and sound timers
     uint8_t ram[RAM_SIZE], reg[REGISTER_SIZE+1];
     uint16_t stack[STACK_SIZE];
     uint16_t pc, I;
+    uint16_t opcode;
 
     uint8_t pixels[DISPLAY_WIDTH][DISPLAY_HEIGHT];
     Texture2D display;
