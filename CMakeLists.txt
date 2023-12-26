@@ -7,32 +7,23 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_COMPILER clang)
 option(ANGLE "Enable ANGLE support")
 
+if (NOT CMAKE_BUILD_TYPE)
+    MESSAGE("Defaulting to Build type Debug")
+    set(CMAKE_BUILD_TYPE "Debug")
+endif ()
 
 ##   CONFIGURE DEFAULT OPENGL VERSION
 if (APPLE)
     if (ANGLE)
         set(OPENGL_VERSION "ES 2.0")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_ES2")
     else ()
         set(OPENGL_VERSION "3.3")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_33")
     endif ()
 else ()
     set(OPENGL_VERSION "4.3")
-endif ()
-if (NOT ${OPENGL_VERSION} MATCHES "OFF")
-    set(${SUGGESTED_GRAPHICS} "${GRAPHICS}")
-    if (${OPENGL_VERSION} MATCHES "4.3")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_43")
-    elseif (${OPENGL_VERSION} MATCHES "3.3")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_33")
-    elseif (${OPENGL_VERSION} MATCHES "2.1")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_21")
-    elseif (${OPENGL_VERSION} MATCHES "1.1")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_11")
-    elseif (${OPENGL_VERSION} MATCHES "ES 2.0")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_ES2")
-    elseif (${OPENGL_VERSION} MATCHES "ES 3.0")
-        set(GRAPHICS "GRAPHICS_API_OPENGL_ES3")
-    endif ()
+    set(GRAPHICS "GRAPHICS_API_OPENGL_43")
 endif ()
 
 
@@ -114,11 +105,7 @@ endif ()
 MESSAGE("-- GIT: ${GIT_REF}")
 
 
-#   WARNINGS IF NO BUILD TYPE DEFINED AND ANGLE MACOS
-if (NOT CMAKE_BUILD_TYPE)
-    MESSAGE(AUTHOR_WARNING "SET A CMAKE BUILD TYPE WITH: '-DCMAKE_BUILD_TYPE='")
-endif ()
-
+#   WARNINGS IF NO ANGLE MACOS
 if (APPLE AND NOT CMAKE_SYSTEM STRLESS "Darwin-18.0.0" AND NOT ANGLE)
     MESSAGE(AUTHOR_WARNING "Please consider using ANGLE starting with macOS 10.14 (Mojave)!")
 endif ()

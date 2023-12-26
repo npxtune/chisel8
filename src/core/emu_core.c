@@ -224,7 +224,7 @@ int32_t decode_exec(chip8 *emu, options_config *config) {
                             }
                             emu->pixels[X + x][Y + y] ^= 1;
                         } else {
-                           printf("EMU_CORE: WARNING -> TRIED TO DRAW OUTSIDE WINDOW:\tX: %03d | Y: %03d\n", X, Y);
+                           printf("EMU_CORE: WARNING -> Tried to draw outside bounds:\tX: %03d | Y: %03d\n", X, Y);
                         }
                     }
                 }
