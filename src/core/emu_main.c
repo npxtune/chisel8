@@ -7,6 +7,45 @@ void emu_stop(chip8 *system) {
     ClearBackground(BLACK);
     printf("EMU_MAIN: Stopping emulation\n");
     printf("===================================================\n");
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+}
+
+void check_input(chip8 *emu) {
+    emu->key = -1;
+    if (IsKeyReleased(KEY_ONE)) {
+        emu->key = 0x0;
+    } else if (IsKeyReleased(KEY_TWO)) {
+        emu->key = 0x1;
+    } else if (IsKeyReleased(KEY_THREE)) {
+        emu->key = 0x2;
+    } else if (IsKeyReleased(KEY_FOUR)) {
+        emu->key = 0x3;
+    } else if (IsKeyReleased(KEY_Q)) {
+        emu->key = 0x4;
+    } else if (IsKeyReleased(KEY_W)) {
+        emu->key = 0x5;
+    } else if (IsKeyReleased(KEY_E)) {
+        emu->key = 0x6;
+    } else if (IsKeyReleased(KEY_R)) {
+        emu->key = 0x7;
+    } else if (IsKeyReleased(KEY_A)) {
+        emu->key = 0x8;
+    } else if (IsKeyReleased(KEY_S)) {
+        emu->key = 0x9;
+    } else if (IsKeyReleased(KEY_D)) {
+        emu->key = 0xa;
+    } else if (IsKeyReleased(KEY_F)) {
+        emu->key = 0xb;
+    } else if (IsKeyReleased(KEY_Z)) {
+        emu->key = 0xc;
+    } else if (IsKeyReleased(KEY_X)) {
+        emu->key = 0xd;
+    } else if (IsKeyReleased(KEY_C)) {
+        emu->key = 0xe;
+    } else if (IsKeyReleased(KEY_V)) {
+        emu->key = 0xf;
+    }
+    //  This is horrible -> TODO: IMPROVE INPUT CHECKING!!!
 }
 
 int32_t emu_main(options_config *config) {
@@ -20,7 +59,7 @@ int32_t emu_main(options_config *config) {
     for (int i = 0; i < STACK_SIZE; ++i) {
         system.stack[i] = 0;
     }
-    system.i_stack = 0;
+    system.i_stack = -1;
     printf("EMU_MAIN: Cleared stack\n");
     for (int i = 0; i < REGISTER_SIZE; ++i) {
         system.reg[i] = 0;
@@ -40,9 +79,15 @@ int32_t emu_main(options_config *config) {
 
     system.delay = 0, system.sound = 0;
 
+    system.key = false;
+
+    system.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
+    ClearWindowState(FLAG_WINDOW_RESIZABLE);
+
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
-        ClearBackground(BLACK);
+
+        check_input(&system);
 
         // Draw Pixels from virtual Texture
         DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
@@ -60,9 +105,9 @@ int32_t emu_main(options_config *config) {
             emu_stop(&system);
             return -2;
         }
+        system.delay -= 60, system.sound -= 60;
         EndDrawing();
     }
-    UnloadTexture(system.display);
     emu_stop(&system);
     return 0;
 }

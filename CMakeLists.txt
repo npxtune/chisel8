@@ -8,14 +8,31 @@ set(CMAKE_CXX_COMPILER clang)
 option(ANGLE "Enable ANGLE support")
 
 
-#   CONFIGURE DEFAULT OPENGL VERSION
-if (NOT APPLE)
-    set(OPENGL_VERSION "4.3")
+##   CONFIGURE DEFAULT OPENGL VERSION
+if (APPLE)
+    if (ANGLE)
+        set(OPENGL_VERSION "ES 2.0")
+    else ()
+        set(OPENGL_VERSION "3.3")
+    endif ()
 else ()
-    set(OPENGL_VERSION "3.3")
+    set(OPENGL_VERSION "4.3")
 endif ()
-if (ANGLE)
-    set(OPENGL_VERSION "ES 2.0")    #   ANGLE SUPPORT
+if (NOT ${OPENGL_VERSION} MATCHES "OFF")
+    set(${SUGGESTED_GRAPHICS} "${GRAPHICS}")
+    if (${OPENGL_VERSION} MATCHES "4.3")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_43")
+    elseif (${OPENGL_VERSION} MATCHES "3.3")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_33")
+    elseif (${OPENGL_VERSION} MATCHES "2.1")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_21")
+    elseif (${OPENGL_VERSION} MATCHES "1.1")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_11")
+    elseif (${OPENGL_VERSION} MATCHES "ES 2.0")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_ES2")
+    elseif (${OPENGL_VERSION} MATCHES "ES 3.0")
+        set(GRAPHICS "GRAPHICS_API_OPENGL_ES3")
+    endif ()
 endif ()
 
 
@@ -47,7 +64,6 @@ file(GLOB_RECURSE CORE "src/core/*.c"
 add_executable(${PROJECT_NAME}
         ${MAIN}
         ${CORE}
-        ${EMU}
         ${GUI}
 )
 
@@ -84,7 +100,6 @@ if (ANGLE)
             ${ANGLE_EGL_LIBRARY}
             ${ANGLE_GLESv2_LIBRARY}
     )
-    MESSAGE("-- USING: ANGLE")
 
 
     #   IF NOT ANGLE:  LINK LIBRARIES INTO BINARY
@@ -93,7 +108,6 @@ else ()
             raylib
             raygui
     )
-    MESSAGE("-- USING: OpenGL ${OPENGL_VERSION}")
 endif ()
 
 #   SHOW GITHUB REF STRING
