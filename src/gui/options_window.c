@@ -36,9 +36,9 @@ void load_settings(options_config *config) {
     FILE *file = fopen("./chisel8-settings.txt", "r");
     if (file != NULL) {
         // READ OPTIONS
-        char line[250];
+        char line[100];
         for (int i = 0; i < items; ++i) {
-            fgets(line, 250, file);
+            fgets(line, 100, file);
             uint16_t color[4] = {0,0,0,0};
             uint32_t counter = 0;
 
@@ -99,6 +99,7 @@ void load_settings(options_config *config) {
                     return;
             }
         }
+        MemFree(line);
     } else {
         // CREATE OPTIONS
         create_config(config);

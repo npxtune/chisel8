@@ -11,45 +11,48 @@ void emu_stop(chip8 *system) {
 }
 
 void check_input(chip8 *emu) {
-    emu->key = -1;
-    if (IsKeyReleased(KEY_ONE)) {
-        emu->key = 0x0;
-    } else if (IsKeyReleased(KEY_TWO)) {
+    if (IsKeyPressed(KEY_ONE)) {
         emu->key = 0x1;
-    } else if (IsKeyReleased(KEY_THREE)) {
+    } else if (IsKeyPressed(KEY_TWO)) {
         emu->key = 0x2;
-    } else if (IsKeyReleased(KEY_FOUR)) {
+    } else if (IsKeyPressed(KEY_THREE)) {
         emu->key = 0x3;
-    } else if (IsKeyReleased(KEY_Q)) {
-        emu->key = 0x4;
-    } else if (IsKeyReleased(KEY_W)) {
-        emu->key = 0x5;
-    } else if (IsKeyReleased(KEY_E)) {
-        emu->key = 0x6;
-    } else if (IsKeyReleased(KEY_R)) {
-        emu->key = 0x7;
-    } else if (IsKeyReleased(KEY_A)) {
-        emu->key = 0x8;
-    } else if (IsKeyReleased(KEY_S)) {
-        emu->key = 0x9;
-    } else if (IsKeyReleased(KEY_D)) {
-        emu->key = 0xa;
-    } else if (IsKeyReleased(KEY_F)) {
-        emu->key = 0xb;
-    } else if (IsKeyReleased(KEY_Z)) {
+    } else if (IsKeyPressed(KEY_FOUR)) {
         emu->key = 0xc;
-    } else if (IsKeyReleased(KEY_X)) {
+    } else if (IsKeyPressed(KEY_Q)) {
+        emu->key = 0x4;
+    } else if (IsKeyPressed(KEY_W)) {
+        emu->key = 0x5;
+    } else if (IsKeyPressed(KEY_E)) {
+        emu->key = 0x6;
+    } else if (IsKeyPressed(KEY_R)) {
+        emu->key = 0x7;
+    } else if (IsKeyPressed(KEY_A)) {
+        emu->key = 0xa;
+    } else if (IsKeyPressed(KEY_S)) {
+        emu->key = 0x8;
+    } else if (IsKeyPressed(KEY_D)) {
         emu->key = 0xd;
-    } else if (IsKeyReleased(KEY_C)) {
+    } else if (IsKeyPressed(KEY_F)) {
         emu->key = 0xe;
-    } else if (IsKeyReleased(KEY_V)) {
+    } else if (IsKeyPressed(KEY_Z)) {
+        emu->key = 0x9;
+    } else if (IsKeyPressed(KEY_X)) {
+        emu->key = 0x0;
+    } else if (IsKeyPressed(KEY_C)) {
+        emu->key = 0xb;
+    } else if (IsKeyPressed(KEY_V)) {
         emu->key = 0xf;
+    } else {
+        emu->key = -1;
     }
     //  This is horrible -> TODO: IMPROVE INPUT CHECKING!!!
 }
 
 int32_t emu_main(options_config *config) {
     chip8 system;
+    bool undefined = false;
+
     printf("===================================================\n");
     printf("EMU_MAIN: Starting Emulation\n");
     for (int i = 0; i < RAM_SIZE; ++i) {
@@ -77,9 +80,13 @@ int32_t emu_main(options_config *config) {
     system.pc = 0x200;
     printf("EMU_MAIN: Set pc to Address 0x200 in ram\n");
 
-    system.delay = 0, system.sound = 0;
+    for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+        for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+            system.pixels[x][y] = 0;
+        }
+    }
 
-    system.key = false;
+    system.delay = 0, system.sound = 0;
 
     system.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
@@ -87,25 +94,31 @@ int32_t emu_main(options_config *config) {
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
 
-        check_input(&system);
-
         // Draw Pixels from virtual Texture
         DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
 
-        if (fetch(&system) == -1) {
-            emu_stop(&system);
-            return -1;
-        }
-        if (decode_exec(&system, config) == -1) {
-            emu_stop(&system);
-            return -1;
+        //DrawText(TextFormat("%dhz", GetFPS()), (int)config->display_scaling,(int)config->display_scaling/2, GetScreenHeight()/(config->display_scaling*1.5), DARKGREEN);
+
+        check_input(&system);
+
+        for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
+            if (!undefined && fetch(&system) == -1) {
+                undefined = true;
+                printf("EMU_MAIN: Pausing emulation!\n");
+                continue;
+            }
+            if (!undefined && decode_exec(&system, config) == -1) {
+                undefined = true;
+                printf("EMU_MAIN: Pausing emulation!\n");
+                continue;
+            }
         }
 
         if(WindowShouldClose()) {
             emu_stop(&system);
             return -2;
         }
-        system.delay -= 60, system.sound -= 60;
+        system.delay -= REFRESH_RATE, system.sound -= REFRESH_RATE;
         EndDrawing();
     }
     emu_stop(&system);
