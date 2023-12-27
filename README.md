@@ -4,11 +4,12 @@ Special thanks to everyone in the [EmuDev Discord Server](https://discord.com/in
 
 Pictures:
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <img width="1392" alt="Menu" src="pictures/menu.png" style="width: 30%; max-width: 200px;">
-  <img width="1392" alt="IBM LOGO" src="pictures/ibm.png" style="width: 30%; max-width: 200px;">
-  <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/chip8-logo.png" style="width: 30%; max-width: 200px;">
-<img width="1392" alt="Chip-8 TTS LOGO" src="pictures/corax+.png" style="width: 30%; max-width: 200px;">
-<img width="1392" alt="Chip-8 TTS LOGO" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="Menu" src="pictures/menu.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="IBM LOGO" src="pictures/ibm.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="Chip-8 TTS LOGO" src="pictures/chip8-logo.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="corax+" src="pictures/corax+.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="flags" src="pictures/flags.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="settings" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
 </div>
 
 ---
@@ -26,8 +27,9 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 - [ ] Chip-8 Audio emulation (it's just a beep...)
 - [ ] Correct keypad input (currently wonky...)
 
-
-    Please report any bugs via GitHub on the issue page. Thank you!
+```
+Please report any bugs via GitHub on the issue page. Thank you!
+```
 ---
 # Build instructions:
 ### MacOS & Linux:
@@ -82,5 +84,7 @@ the ANGLE dylib files into the `build` dir, so it can load them. Remember to run
 No idea, good luck. If you figured it out, let me know per PR. Probably something similair to the steps above.
 
 ---
+```
     Copyright (c) 2023 Tim <npxtune@scanf.dev> , All rights served.
     This project is MIT licensed.
+```
