@@ -205,11 +205,13 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             if (N2 == 0x9e) {
                 if (chip8->key == chip8->reg[X]) {
                     chip8->pc+=2;
+                    chip8->key = -1;
                 }
 
             } else if (N2 == 0xa1) {
                 if (chip8->key != chip8->reg[X]) {
                     chip8->pc+=2;
+                    chip8->key = -1;
                 }
 
             } else {
@@ -297,18 +299,20 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                 }
             }
 
-            // Save pixels into a virtual Texture
-            Image chip88_pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
-            for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-                for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-                    if (chip8->pixels[x][y] == 1) {
-                        ImageDrawPixel(&chip88_pixels, x, y, config->pixel_color);
+            if (chip8->display_id == chip8->display.id) {       //  Fix for TextureID overflow in Pong (1player) ROM
+                // Save pixels into a virtual Texture
+                Image pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
+                for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+                    for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+                        if (chip8->pixels[x][y] == 1) {
+                            ImageDrawPixel(&pixels, x, y, config->pixel_color);
+                        }
                     }
                 }
+                UnloadTexture(chip8->display);
+                chip8->display = LoadTextureFromImage(pixels);
+                UnloadImage(pixels);
             }
-            UnloadTexture(chip8->display);
-            chip8->display = LoadTextureFromImage(chip88_pixels);
-            UnloadImage(chip88_pixels);
             break;
 
         default:

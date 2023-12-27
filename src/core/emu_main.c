@@ -36,37 +36,37 @@ void emu_stop(emu *chip8) {
 }
 
 void check_input(emu *chip8) {
-    if (IsKeyPressed(KEY_ONE)) {
+    if (IsKeyDown(KEY_ONE)) {
         chip8->key = 0x1;
-    } else if (IsKeyPressed(KEY_TWO)) {
+    } else if (IsKeyDown(KEY_TWO)) {
         chip8->key = 0x2;
-    } else if (IsKeyPressed(KEY_THREE)) {
+    } else if (IsKeyDown(KEY_THREE)) {
         chip8->key = 0x3;
-    } else if (IsKeyPressed(KEY_FOUR)) {
+    } else if (IsKeyDown(KEY_FOUR)) {
         chip8->key = 0xc;
-    } else if (IsKeyPressed(KEY_Q)) {
+    } else if (IsKeyDown(KEY_Q)) {
         chip8->key = 0x4;
-    } else if (IsKeyPressed(KEY_W)) {
+    } else if (IsKeyDown(KEY_W)) {
         chip8->key = 0x5;
-    } else if (IsKeyPressed(KEY_E)) {
+    } else if (IsKeyDown(KEY_E)) {
         chip8->key = 0x6;
-    } else if (IsKeyPressed(KEY_R)) {
+    } else if (IsKeyDown(KEY_R)) {
         chip8->key = 0x7;
-    } else if (IsKeyPressed(KEY_A)) {
+    } else if (IsKeyDown(KEY_A)) {
         chip8->key = 0xa;
-    } else if (IsKeyPressed(KEY_S)) {
+    } else if (IsKeyDown(KEY_S)) {
         chip8->key = 0x8;
-    } else if (IsKeyPressed(KEY_D)) {
+    } else if (IsKeyDown(KEY_D)) {
         chip8->key = 0xd;
-    } else if (IsKeyPressed(KEY_F)) {
+    } else if (IsKeyDown(KEY_F)) {
         chip8->key = 0xe;
-    } else if (IsKeyPressed(KEY_Z)) {
+    } else if (IsKeyDown(KEY_Z)) {
         chip8->key = 0x9;
-    } else if (IsKeyPressed(KEY_X)) {
+    } else if (IsKeyDown(KEY_X)) {
         chip8->key = 0x0;
-    } else if (IsKeyPressed(KEY_C)) {
+    } else if (IsKeyDown(KEY_C)) {
         chip8->key = 0xb;
-    } else if (IsKeyPressed(KEY_V)) {
+    } else if (IsKeyDown(KEY_V)) {
         chip8->key = 0xf;
     } else {
         chip8->key = -1;
@@ -114,6 +114,7 @@ int32_t emu_main(options_config *config) {
     chip8.delay = 0, chip8.sound = 0;
 
     chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
+    chip8.display_id = chip8.display.id;
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
@@ -127,9 +128,10 @@ int32_t emu_main(options_config *config) {
                      (int)(GetScreenHeight()/(config->display_scaling*1.5)), DARKGREEN);
         }
 
-        check_input(&chip8);
-
         for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
+
+            check_input(&chip8);
+
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
                 printf("EMU_MAIN: Pausing emulation!\n");
@@ -142,7 +144,7 @@ int32_t emu_main(options_config *config) {
             }
         }
 
-        if(WindowShouldClose()) {
+        if (WindowShouldClose()) {
             emu_stop(&chip8);
             return -2;
         }
