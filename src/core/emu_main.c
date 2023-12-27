@@ -1,113 +1,141 @@
-#include "core/emu_main.h"
-#include "core/emu_definition.h"
 
-void emu_stop(chip8 *system) {
+//==============================================================================
+//    -  MIT License | emu_main.c
+//
+//      Copyright (c) 2023, Tim <npxtune@scanf.dev>
+//      All rights served.
+//
+//     Permission is hereby granted, free of charge, to any person obtaining a copy
+//     of this software and associated documentation files (the "Software"), to deal
+//     in the Software without restriction, including without limitation the rights
+//     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//     copies of the Software, and to permit persons to whom the Software is
+//     furnished to do so, subject to the following conditions:
+//
+//     The above copyright notice and this permission notice shall be included in all
+//     copies or substantial portions of the Software.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//     SOFTWARE.
+//==============================================================================
+
+#include "core/emu_main.h"
+
+void emu_stop(emu *chip8) {
     EndDrawing();
-    UnloadTexture(system->display);
+    UnloadTexture(chip8->display);
     ClearBackground(BLACK);
     printf("EMU_MAIN: Stopping emulation\n");
     printf("===================================================\n");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 }
 
-void check_input(chip8 *emu) {
+void check_input(emu *chip8) {
     if (IsKeyPressed(KEY_ONE)) {
-        emu->key = 0x1;
+        chip8->key = 0x1;
     } else if (IsKeyPressed(KEY_TWO)) {
-        emu->key = 0x2;
+        chip8->key = 0x2;
     } else if (IsKeyPressed(KEY_THREE)) {
-        emu->key = 0x3;
+        chip8->key = 0x3;
     } else if (IsKeyPressed(KEY_FOUR)) {
-        emu->key = 0xc;
+        chip8->key = 0xc;
     } else if (IsKeyPressed(KEY_Q)) {
-        emu->key = 0x4;
+        chip8->key = 0x4;
     } else if (IsKeyPressed(KEY_W)) {
-        emu->key = 0x5;
+        chip8->key = 0x5;
     } else if (IsKeyPressed(KEY_E)) {
-        emu->key = 0x6;
+        chip8->key = 0x6;
     } else if (IsKeyPressed(KEY_R)) {
-        emu->key = 0x7;
+        chip8->key = 0x7;
     } else if (IsKeyPressed(KEY_A)) {
-        emu->key = 0xa;
+        chip8->key = 0xa;
     } else if (IsKeyPressed(KEY_S)) {
-        emu->key = 0x8;
+        chip8->key = 0x8;
     } else if (IsKeyPressed(KEY_D)) {
-        emu->key = 0xd;
+        chip8->key = 0xd;
     } else if (IsKeyPressed(KEY_F)) {
-        emu->key = 0xe;
+        chip8->key = 0xe;
     } else if (IsKeyPressed(KEY_Z)) {
-        emu->key = 0x9;
+        chip8->key = 0x9;
     } else if (IsKeyPressed(KEY_X)) {
-        emu->key = 0x0;
+        chip8->key = 0x0;
     } else if (IsKeyPressed(KEY_C)) {
-        emu->key = 0xb;
+        chip8->key = 0xb;
     } else if (IsKeyPressed(KEY_V)) {
-        emu->key = 0xf;
+        chip8->key = 0xf;
     } else {
-        emu->key = -1;
+        chip8->key = -1;
     }
     //  This is horrible -> TODO: IMPROVE INPUT CHECKING!!!
 }
 
 int32_t emu_main(options_config *config) {
-    chip8 system;
+    emu chip8;
     bool undefined = false;
 
     printf("===================================================\n");
     printf("EMU_MAIN: Starting Emulation\n");
     for (int i = 0; i < RAM_SIZE; ++i) {
-        system.ram[i] = 0;
+        chip8.ram[i] = 0;
     }
     printf("EMU_MAIN: Cleared ram\n");
     for (int i = 0; i < STACK_SIZE; ++i) {
-        system.stack[i] = 0;
+        chip8.stack[i] = 0;
     }
-    system.i_stack = -1;
+    chip8.i_stack = -1;
     printf("EMU_MAIN: Cleared stack\n");
     for (int i = 0; i < REGISTER_SIZE; ++i) {
-        system.reg[i] = 0;
+        chip8.reg[i] = 0;
     }
     printf("EMU_MAIN: Cleared registers\n");
-    if (gui_load_file(&system) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
+    if (gui_load_file(&chip8) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
         printf("EMU_MAIN: Emulation stopped\n");
         printf("===================================================\n");
         return -1;
     }
     for (int i = 0; i < FONT_SIZE; ++i) {
-        system.ram[i] = FONT[i];
+        chip8.ram[i] = FONT[i];
     }
     printf("EMU_MAIN: Loaded FONT SET into ram\n");
-    system.pc = 0x200;
+    chip8.pc = 0x200;
     printf("EMU_MAIN: Set pc to Address 0x200 in ram\n");
 
     for (int x = 0; x < DISPLAY_WIDTH; ++x) {
         for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-            system.pixels[x][y] = 0;
+            chip8.pixels[x][y] = 0;
         }
     }
 
-    system.delay = 0, system.sound = 0;
+    chip8.delay = 0, chip8.sound = 0;
 
-    system.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
+    chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
 
         // Draw Pixels from virtual Texture
-        DrawTextureEx(system.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
+        DrawTextureEx(chip8.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
 
-        //DrawText(TextFormat("%dhz", GetFPS()), (int)config->display_scaling,(int)config->display_scaling/2, GetScreenHeight()/(config->display_scaling*1.5), DARKGREEN);
+        if(config->show_fps) {
+            DrawText(TextFormat("%dhz", GetFPS()), (int)config->display_scaling,(int)config->display_scaling/2,
+                     (int)(GetScreenHeight()/(config->display_scaling*1.5)), DARKGREEN);
+        }
 
-        check_input(&system);
+        check_input(&chip8);
 
         for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
-            if (!undefined && fetch(&system) == -1) {
+            if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
                 printf("EMU_MAIN: Pausing emulation!\n");
                 continue;
             }
-            if (!undefined && decode_exec(&system, config) == -1) {
+            if (!undefined && decode_exec(&chip8, config) == -1) {
                 undefined = true;
                 printf("EMU_MAIN: Pausing emulation!\n");
                 continue;
@@ -115,12 +143,12 @@ int32_t emu_main(options_config *config) {
         }
 
         if(WindowShouldClose()) {
-            emu_stop(&system);
+            emu_stop(&chip8);
             return -2;
         }
-        system.delay -= REFRESH_RATE, system.sound -= REFRESH_RATE;
+        chip8.delay -= REFRESH_RATE, chip8.sound -= REFRESH_RATE;
         EndDrawing();
     }
-    emu_stop(&system);
+    emu_stop(&chip8);
     return 0;
 }

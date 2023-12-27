@@ -1,7 +1,30 @@
+
+//==============================================================================
+//    -  MIT License | options_window.c
+//
+//      Copyright (c) 2023, Tim <npxtune@scanf.dev>
+//      All rights served.
+//
+//     Permission is hereby granted, free of charge, to any person obtaining a copy
+//     of this software and associated documentation files (the "Software"), to deal
+//     in the Software without restriction, including without limitation the rights
+//     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//     copies of the Software, and to permit persons to whom the Software is
+//     furnished to do so, subject to the following conditions:
+//
+//     The above copyright notice and this permission notice shall be included in all
+//     copies or substantial portions of the Software.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//     SOFTWARE.
+//==============================================================================
+
 #include "gui/options_window.h"
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
 
 //  DEFAULT SETTINGS VALUES
 
@@ -43,7 +66,7 @@ void load_settings(options_config *config) {
             uint32_t counter = 0;
 
             // Skip line if it is not a value
-            if (line[0] == '#' || line[0] == '\n' || line[0] == ' ') {
+            if (line[0] == '#' || line[0] == '\n' || line[0] == EOF) {
                 i -= 1;
                 continue;
             }
@@ -88,18 +111,27 @@ void load_settings(options_config *config) {
                     config->display_scaling = color[0];
                     break;
 
-//                case 3:
-//                    break;
-//
-//                case 4:
-//                    break;
+                case 3:
+                    if(strncmp(&line[0],"true;", sizeof("true;")) == 0) {
+                        config->show_debug = true;
+                    } else {
+                        config->show_debug = false;
+                    }
+                    break;
+
+                case 4:
+                    if(strncmp(&line[0],"true;", sizeof("true;")) == 0) {
+                        config->show_fps = true;
+                    } else {
+                        config->show_fps = false;
+                    }
+                    break;
 
                 default:
                     fclose(file);
                     return;
             }
         }
-        MemFree(line);
     } else {
         // CREATE OPTIONS
         create_config(config);

@@ -1,0 +1,15 @@
+<component name="CopyrightManager">
+  <settings default="MIT">
+    <module2copyright>
+      <element module="Chisel-8" copyright="MIT" />
+    </module2copyright>
+    <LanguageOptions name="ObjectiveC">
+      <option name="fileTypeOverride" value="3" />
+      <option name="block" value="false" />
+      <option name="separateBefore" value="true" />
+      <option name="separateAfter" value="true" />
+      <option name="prefixLines" value="false" />
+      <option name="filler" value="=" />
+    </LanguageOptions>
+  </settings>
+</component>

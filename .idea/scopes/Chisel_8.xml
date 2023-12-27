@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Chisel-8" pattern="file[chisel8]:src//*||file[chisel8]:include//*||file:CMakeLists.txt" />
+</component>
