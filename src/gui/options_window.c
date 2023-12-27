@@ -30,7 +30,7 @@
 
 #define color_0     "  0,  0,  0, 1;    # Background color\n"       // Default color is BLACK
 #define color_1     "255,255,255, 1;    # Pixel color\n"            // Default color is WHITE
-#define scale       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
+#define scale       "18;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
 #define debug       "false;             # Show debugging info in terminal\n"
 #define fps         "false;             # Show Frames per Second in the top left\n"
 
@@ -60,6 +60,7 @@ void load_settings(options_config *config) {
     if (file != NULL) {
         // READ OPTIONS
         char line[100];
+        int32_t temp = 0;
         for (int i = 0; i < items; ++i) {
             fgets(line, 100, file);
             uint16_t color[4] = {0,0,0,0};
@@ -112,7 +113,8 @@ void load_settings(options_config *config) {
                     break;
 
                 case 3:
-                    if(strncmp(&line[0],"true;", sizeof("true;")) == 0) {
+                    for (temp = 0; line[temp] != ';'; ++temp) {}
+                    if(strncmp(&line[0],"true", sizeof(line[temp])) == 0) {
                         config->show_debug = true;
                     } else {
                         config->show_debug = false;
@@ -120,7 +122,8 @@ void load_settings(options_config *config) {
                     break;
 
                 case 4:
-                    if(strncmp(&line[0],"true;", sizeof("true;")) == 0) {
+                    for (temp = 0; line[temp] != ';'; ++temp) {}
+                    if(strncmp(&line[0],"true", sizeof(line[temp])) == 0) {
                         config->show_fps = true;
                     } else {
                         config->show_fps = false;

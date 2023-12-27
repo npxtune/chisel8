@@ -1,4 +1,4 @@
-# chisel8
+# <img width="32" alt="Icon" src="pictures/icon.png" style="width: 50%; max-width: 42px;"> chisel8
 Compact Hexadecimal Interpretive Programming – 8-bit (Chip-8 Interpreter), written in C with use of the [Raylib](https://github.com/raysan5/raylib) and [Raygui](https://github.com/raysan5/raygui) libraries.
 Special thanks to everyone in the [EmuDev Discord Server](https://discord.com/invite/7nuaqZ2) that helped out with fixing some issues and handling undefined behaviour.
 
@@ -6,7 +6,7 @@ Pictures:
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
   <img width="1392" alt="Menu" src="pictures/menu.png" style="width: 30%; max-width: 200px;">
   <img width="1392" alt="IBM LOGO" src="pictures/ibm.png" style="width: 30%; max-width: 200px;">
-  <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/emu-logo.png" style="width: 30%; max-width: 200px;">
+  <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/chip8-logo.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/corax+.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
 </div>
@@ -31,6 +31,8 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 ---
 # Build instructions:
 ### MacOS & Linux:
+
+#### OpenGL:
 ```zsh
 git clone https://github.com/npxtune/chisel8.git
 cd chisel8
@@ -42,6 +44,38 @@ make -j 6 # '6' -> How many cores you want to use
 ```
 That's it. Remember to install the necessary raylib + raygui [dependencies](https://github.com/raysan5/raylib/wiki) for your platform.
 
+---
+#### ANGLE:
+This will be a little more complex
+```zsh
+git clone https://github.com/npxtune/chisel8.git
+cd chisel8
+git submodule update --init --recursive   # To fetch raylib & raygui
+```
+You will now need to provide the ANGLE dylibs in `external/angle-lib/`:
+```
+File tree:
+
+root/
+|-- external/
+    |-- angle-lib/
+        |-- libEGL.dylib
+        |-- libGLESv2.dylib
+```
+Without these libraries, ANGLE won't be able to be loaded & compiled against.
+If both of these are in their respective directory, you can continue as follows:
+```zsh
+mkdir build && cd ./build
+cmake -DCMAKE_BUILD_TYPE=Release -DANGLE:BOOL=ON -DOPENGL_VERSION:STRING="ES 2.0" ..
+make -j 6 # '6' -> How many cores you want to use
+```
+The ANGLE and OpenGL cmake options are important, I tried to make this work automatically
+but it's wonky, so I would recommend to just include these options. When compiled, copy over
+the ANGLE dylib files into the `build` dir, so it can load them. Remember to run the binary
+**from the build directory!**
+```zsh
+./chisel8
+```
 
 ---
 ### Windows:

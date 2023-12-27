@@ -36,7 +36,9 @@
 void main_window(options_config *config) {
 
     //  Show debug info?
-    if(!config->show_debug) {
+    if(config->show_debug == true) {
+        SetTraceLogLevel(LOG_INFO);
+    } else {
         SetTraceLogLevel(LOG_ERROR);
     }
 
