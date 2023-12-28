@@ -27,7 +27,7 @@
 #include "core/emu_core.h"
 
 int32_t undefined(void) {           // Handles undefined behaviour
-    fprintf(stderr, "%s", "EMU_CORE: FATAL ERROR -> COULD NOT DECODE INSTRUCTION!\n");
+    TraceLog(LOG_ERROR, "EMU_CORE -> COULD NOT DECODE INSTRUCTION!");
     return -1;
 }
 
@@ -36,7 +36,7 @@ int32_t fetch(emu *chip8) {      // Fetches instruction
     chip8->opcode <<= 8;
     chip8->opcode += chip8->ram[chip8->pc++];
     if (chip8->opcode == 0x0000) {
-        return -1;
+        return undefined();
     }
     return 0;
 }
@@ -291,28 +291,29 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                 uint8_t pixel = chip8->ram[chip8->I + y];
                 for (int x = 0; x < 8; ++x) {
                     if ((pixel & (0x80 >> x)) != 0) {
-                        if (chip8->pixels[X + x][Y + y] == 1) {
-                            chip8->reg[0xF] = 1;
+                        if (X+x < DISPLAY_WIDTH && Y+y < DISPLAY_HEIGHT) {
+                            if (chip8->pixels[X + x][Y + y] == 1) {
+                                chip8->reg[0xF] = 1;
+                            }
+                            chip8->pixels[X + x][Y + y] ^= 1;
+                        } else {
+                            TraceLog(LOG_WARNING, "EMU_CORE: Tried to draw out of bounds!");
                         }
-                        chip8->pixels[X + x][Y + y] ^= 1;
                     }
                 }
             }
 
-            if (chip8->display_id == chip8->display.id) {       //  Fix for TextureID overflow in Pong (1player) ROM
-                // Save pixels into a virtual Texture
-                Image pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
-                for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-                    for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-                        if (chip8->pixels[x][y] == 1) {
-                            ImageDrawPixel(&pixels, x, y, config->pixel_color);
-                        }
+            // Save pixels into a virtual Texture
+            Image pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
+            for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+                for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+                    if (chip8->pixels[x][y] == 1) {
+                        ImageDrawPixel(&pixels, x, y, config->pixel_color);
                     }
                 }
-                UnloadTexture(chip8->display);
-                chip8->display = LoadTextureFromImage(pixels);
-                UnloadImage(pixels);
             }
+            UpdateTexture(chip8->display, pixels.data);
+            UnloadImage(pixels);
             break;
 
         default:
