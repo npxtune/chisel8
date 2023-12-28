@@ -30,7 +30,7 @@ void emu_stop(emu *chip8) {
     EndDrawing();
     UnloadTexture(chip8->display);
     ClearBackground(BLACK);
-    printf("EMU_MAIN: Stopping emulation\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Stopping emulation");
     printf("===================================================\n");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 }
@@ -79,31 +79,31 @@ int32_t emu_main(options_config *config) {
     bool undefined = false;
 
     printf("===================================================\n");
-    printf("EMU_MAIN: Starting Emulation\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Starting emulation");
     for (int i = 0; i < RAM_SIZE; ++i) {
         chip8.ram[i] = 0;
     }
-    printf("EMU_MAIN: Cleared ram\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Cleared RAM");
     for (int i = 0; i < STACK_SIZE; ++i) {
         chip8.stack[i] = 0;
     }
     chip8.i_stack = -1;
-    printf("EMU_MAIN: Cleared stack\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Cleared Stack");
     for (int i = 0; i < REGISTER_SIZE; ++i) {
         chip8.reg[i] = 0;
     }
-    printf("EMU_MAIN: Cleared registers\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Cleared registers");
     if (gui_load_file(&chip8) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
-        printf("EMU_MAIN: Emulation stopped\n");
+        TraceLog(LOG_INFO, "EMU_MAIN -> Emulation stopped");
         printf("===================================================\n");
         return -1;
     }
     for (int i = 0; i < FONT_SIZE; ++i) {
         chip8.ram[i] = FONT[i];
     }
-    printf("EMU_MAIN: Loaded FONT SET into ram\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Loaded FONT into RAM");
     chip8.pc = 0x200;
-    printf("EMU_MAIN: Set pc to Address 0x200 in ram\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Set pc to Address 0x200");
 
     for (int x = 0; x < DISPLAY_WIDTH; ++x) {
         for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
@@ -114,7 +114,6 @@ int32_t emu_main(options_config *config) {
     chip8.delay = 0, chip8.sound = 0;
 
     chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
-    chip8.display_id = chip8.display.id;
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
@@ -134,12 +133,12 @@ int32_t emu_main(options_config *config) {
 
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
-                printf("EMU_MAIN: Pausing emulation!\n");
+                TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
                 continue;
             }
             if (!undefined && decode_exec(&chip8, config) == -1) {
                 undefined = true;
-                printf("EMU_MAIN: Pausing emulation!\n");
+                TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
                 continue;
             }
         }
