@@ -26,11 +26,6 @@
 
 #include "core/emu_file.h"
 
-int32_t error_file() {
-    TraceLog(LOG_ERROR, "EMU_FILE -> Invalid file!");
-    return -1;
-}
-
 int32_t gui_load_file(emu *chip8) {
     FilePathList dropped_file = LoadDroppedFiles();
     if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
@@ -50,5 +45,6 @@ int32_t gui_load_file(emu *chip8) {
         fclose(file);
     }
     UnloadDroppedFiles(dropped_file);
-    return error_file();
+    TraceLog(LOG_ERROR, "EMU_FILE -> Invalid file!");
+    return -1;
 }

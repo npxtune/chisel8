@@ -39,7 +39,7 @@ typedef struct Options_config{
     uint32_t display_scaling;
     bool show_debug;
     bool show_fps;
-    uint16_t main_volume;
+    float volume;
 } options_config;
 
 void create_config(options_config *config);

@@ -33,8 +33,9 @@
 #define scale       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
 #define debug       "false;             # Show debugging info in terminal\n"
 #define fps         "false;             # Show Frames per Second in the top left\n"
+#define audio       "0.50;               # Set the volume of the Chip-8's beep\n"
 
-#define items 5     // How many options are configurable?
+#define items 6     // How many options are configurable?
 
 void create_config(options_config *config) {
     FILE *file = fopen("./chisel8-settings.txt", "w");
@@ -44,13 +45,14 @@ void create_config(options_config *config) {
     fwrite(scale, strlen(scale), 1, file);
     fwrite(debug, strlen(debug), 1, file);
     fwrite(fps, strlen(fps), 1, file);
+    fwrite(audio, strlen(audio), 1, file);
 
     config->background_color = BLACK;
     config->pixel_color = WHITE;
     config->display_scaling = 15;
     config->show_debug = false;
     config->show_fps = false;
-    config->main_volume = 0;
+    config->volume = 0.50f;
 
     fclose(file);
 }
@@ -60,7 +62,7 @@ void load_settings(options_config *config) {
     if (file != NULL) {
         // READ OPTIONS
         char line[100];
-        int32_t temp = 0;
+        int32_t temp;
         for (int i = 0; i < items; ++i) {
             fgets(line, 100, file);
             uint16_t color[4] = {0,0,0,0};
@@ -130,6 +132,15 @@ void load_settings(options_config *config) {
                     }
                     break;
 
+                case 5:
+                    for (temp = 0; line[temp] != ';'; ++temp) {}
+                    if(strncmp(&line[0],"0.", sizeof(line[temp])) == 0) {
+                        config->volume = (float)(line[2] - '0') / 10 + (float)(line[3] - '0') / 100;
+                    } else {
+                        config->volume = 1.0f;
+                    }
+                    break;
+
                 default:
                     fclose(file);
                     return;
@@ -139,5 +150,6 @@ void load_settings(options_config *config) {
         // CREATE OPTIONS
         create_config(config);
     }
+    printf("%f\n", config->volume);
     fclose(file);
 }

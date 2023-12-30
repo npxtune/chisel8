@@ -27,12 +27,13 @@
 #pragma once
 
 #include <stdint.h>
+#include <math.h>
 #include "raylib.h"
 #include "core/emu_definition.h"
 #include "core/emu_file.h"
 #include "core/emu_core.h"
 #include "gui/options_window.h"
 
-void emu_stop(emu *chip8);
+void emu_stop(emu *chip8, AudioStream beep);
 void check_input(emu *chip8);
 int32_t emu_main(options_config *config);
