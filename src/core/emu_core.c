@@ -296,8 +296,6 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                                 chip8->reg[0xF] = 1;
                             }
                             chip8->pixels[X + x][Y + y] ^= 1;
-                        } else {
-                            TraceLog(LOG_WARNING, "EMU_CORE: Tried to draw out of bounds!");
                         }
                     }
                 }

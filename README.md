@@ -21,11 +21,11 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 - [X] Loading of .ch8 ROM files
 - [X] Supports all opcodes for the original [Chip-8](https://emu.gulrak.net/reference/opcodes/) system
 - [X] Settings.txt to change background and pixel color values as well as the display scaling
+- [X] Chip-8 Audio emulation (it's just a beep...)
+- [X] Correct keypad input (currently wonky...)
 - [ ] Settings panel to change color, display scale and debug/FPS info in the application
 - [ ] Loading previous ROM files for quick access via "Load ROM"
-- [ ] External Debug window to show RAM contents, fetched/executed opcodes etc.
-- [ ] Chip-8 Audio emulation (it's just a beep...)
-- [ ] Correct keypad input (currently wonky...)
+- *Scrapped*: ~~External Debug window to show RAM contents, fetched/executed opcodes etc.~~
 
 ```
 Please report any bugs via GitHub on the issue page. Thank you!

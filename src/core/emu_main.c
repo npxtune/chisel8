@@ -26,9 +26,10 @@
 
 #include "core/emu_main.h"
 
-void emu_stop(emu *chip8) {
+void emu_stop(emu *chip8, AudioStream beep) {
     EndDrawing();
     UnloadTexture(chip8->display);
+    UnloadAudioStream(beep);
     CloseAudioDevice();
     ClearBackground(BLACK);
     TraceLog(LOG_INFO, "EMU_MAIN -> Stopped emulation");
@@ -51,17 +52,17 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
     } else if (IsKeyDown(KEY_E)) {
         chip8->key = 0x6;
     } else if (IsKeyDown(KEY_R)) {
-        chip8->key = 0x7;
+        chip8->key = 0xd;
     } else if (IsKeyDown(KEY_A)) {
-        chip8->key = 0xa;
+        chip8->key = 0x7;
     } else if (IsKeyDown(KEY_S)) {
         chip8->key = 0x8;
     } else if (IsKeyDown(KEY_D)) {
-        chip8->key = 0xd;
+        chip8->key = 0x9;
     } else if (IsKeyDown(KEY_F)) {
         chip8->key = 0xe;
     } else if (IsKeyDown(KEY_Z)) {
-        chip8->key = 0x9;
+        chip8->key = 0xa;
     } else if (IsKeyDown(KEY_X)) {
         chip8->key = 0x0;
     } else if (IsKeyDown(KEY_C)) {
@@ -70,6 +71,22 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
         chip8->key = 0xf;
     } else {
         chip8->key = -1;
+    }
+}
+
+//  This is from a raylib audio example :)
+//  Audio frequency values
+float frequency = 440.0f, audio_frequency = 440.0f, sine_index = 0.0f, sample = 50000.0f;
+void generate_beep(void *buffer, unsigned int frames) {
+    audio_frequency = frequency + (audio_frequency - frequency) * 0.95f;
+
+    float increase = audio_frequency / sample;
+    short *d = (short *)buffer;
+
+    for (unsigned int i = 0; i < frames; i++) {
+        d[i] = (short)(16000.0f*sinf(2 * PI * sine_index));
+        sine_index += increase;
+        if (sine_index > 1.0f) sine_index -= 1.0f;
     }
 }
 
@@ -114,8 +131,13 @@ int32_t emu_main(options_config *config) {
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
     InitAudioDevice();
 
+    AudioStream beep = LoadAudioStream(22050, 16, 1);
+    SetAudioStreamCallback(beep, generate_beep);
+    SetAudioStreamVolume(beep, config->volume);
+
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
+
         UnloadDroppedFiles(LoadDroppedFiles());
 
         // Draw Pixels from virtual Texture
@@ -127,6 +149,7 @@ int32_t emu_main(options_config *config) {
         }
 
         for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
+            check_input(&chip8);
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
                 TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
@@ -139,15 +162,22 @@ int32_t emu_main(options_config *config) {
             }
         }
 
-        check_input(&chip8);
+        if (chip8.delay > 0) {
+            chip8.delay -= REFRESH_RATE;
+        }
+        if (chip8.sound > 0) {
+            PlayAudioStream(beep);
+            chip8.sound -= REFRESH_RATE;
+        } else {
+            StopAudioStream(beep);
+        }
 
         if (WindowShouldClose()) {
-            emu_stop(&chip8);
+            emu_stop(&chip8, beep);
             return -2;
         }
-        chip8.delay -= REFRESH_RATE, chip8.sound -= REFRESH_RATE;
         EndDrawing();
     }
-    emu_stop(&chip8);
+    emu_stop(&chip8, beep);
     return 0;
 }

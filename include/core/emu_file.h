@@ -31,5 +31,4 @@
 #include "core/emu_definition.h"
 #include "raylib.h"
 
-int32_t error_file();
 int32_t gui_load_file(emu *chip8);
