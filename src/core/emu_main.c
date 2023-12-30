@@ -29,13 +29,13 @@
 void emu_stop(emu *chip8) {
     EndDrawing();
     UnloadTexture(chip8->display);
+    CloseAudioDevice();
     ClearBackground(BLACK);
-    TraceLog(LOG_INFO, "EMU_MAIN -> Stopping emulation");
-    printf("===================================================\n");
+    TraceLog(LOG_INFO, "EMU_MAIN -> Stopped emulation");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 }
 
-void check_input(emu *chip8) {
+void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but nope...
     if (IsKeyDown(KEY_ONE)) {
         chip8->key = 0x1;
     } else if (IsKeyDown(KEY_TWO)) {
@@ -71,14 +71,12 @@ void check_input(emu *chip8) {
     } else {
         chip8->key = -1;
     }
-    //  This is horrible -> TODO: IMPROVE INPUT CHECKING!!!
 }
 
 int32_t emu_main(options_config *config) {
     emu chip8;
     bool undefined = false;
 
-    printf("===================================================\n");
     TraceLog(LOG_INFO, "EMU_MAIN -> Starting emulation");
     for (int i = 0; i < RAM_SIZE; ++i) {
         chip8.ram[i] = 0;
@@ -95,7 +93,6 @@ int32_t emu_main(options_config *config) {
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared registers");
     if (gui_load_file(&chip8) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
         TraceLog(LOG_INFO, "EMU_MAIN -> Emulation stopped");
-        printf("===================================================\n");
         return -1;
     }
     for (int i = 0; i < FONT_SIZE; ++i) {
@@ -115,22 +112,21 @@ int32_t emu_main(options_config *config) {
 
     chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
     ClearWindowState(FLAG_WINDOW_RESIZABLE);
+    InitAudioDevice();
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
+        UnloadDroppedFiles(LoadDroppedFiles());
 
         // Draw Pixels from virtual Texture
         DrawTextureEx(chip8.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
 
         if(config->show_fps) {
-            DrawText(TextFormat("%dhz", GetFPS()), (int)config->display_scaling,(int)config->display_scaling/2,
+            DrawText(TextFormat("%dhz", GetFPS()+1), (int)config->display_scaling,(int)config->display_scaling/2,
                      (int)(GetScreenHeight()/(config->display_scaling*1.5)), DARKGREEN);
         }
 
         for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
-
-            check_input(&chip8);
-
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
                 TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
@@ -142,6 +138,8 @@ int32_t emu_main(options_config *config) {
                 continue;
             }
         }
+
+        check_input(&chip8);
 
         if (WindowShouldClose()) {
             emu_stop(&chip8);
