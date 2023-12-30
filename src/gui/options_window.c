@@ -30,7 +30,7 @@
 
 #define color_0     "  0,  0,  0, 1;    # Background color\n"       // Default color is BLACK
 #define color_1     "255,255,255, 1;    # Pixel color\n"            // Default color is WHITE
-#define scale       "18;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
+#define scale       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
 #define debug       "false;             # Show debugging info in terminal\n"
 #define fps         "false;             # Show Frames per Second in the top left\n"
 

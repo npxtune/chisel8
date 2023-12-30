@@ -26,38 +26,29 @@
 
 #include "core/emu_file.h"
 
+int32_t error_file() {
+    TraceLog(LOG_ERROR, "EMU_FILE -> Invalid file!");
+    return -1;
+}
+
 int32_t gui_load_file(emu *chip8) {
     FilePathList dropped_file = LoadDroppedFiles();
     if ((dropped_file.count == 1 && IsFileExtension(dropped_file.paths[0], ".ch8"))) {
-        SetWindowTitle(GetFileName(*dropped_file.paths));
         FILE *file = fopen(dropped_file.paths[0], "rb");
-        if (file == NULL) {
-            TraceLog(LOG_ERROR, "EMU_FILE -> Could not open file");
-            return -1;
-        }
-        size_t bytes;
-        TraceLog(LOG_INFO, "EMU_FILE -> Loading ROM into ram:");
-        if ((bytes = fread(chip8->ram+0x200, 1, RAM_SIZE, file)) > 0) {
-            for (int32_t i = 0x200; i < bytes+0x200; i+=2) {
-                if (i % 16 == 0) {
-                    printf("0x%03x\t", i);
-                }
-                printf("%02x%02x ", chip8->ram[i], chip8->ram[i+1]);
-                if ((i+2) % 16 == 0) {
-                    printf("\n");
-                }
+
+        if (file != NULL) {
+            SetWindowTitle(GetFileName(*dropped_file.paths));
+            TraceLog(LOG_INFO, "EMU_FILE -> Loading ROM into ram");
+
+            if ((fread(chip8->ram + 0x200, 1, RAM_SIZE, file)) > 0) {
+                TraceLog(LOG_INFO, "EMU_FILE -> ROM was loaded into ram");
+                fclose(file);
+                UnloadDroppedFiles(dropped_file);
+                return 0;
             }
-            TraceLog(LOG_INFO, "EMU_FILE -> ROM was loaded into ram");
-        } else {
-            TraceLog(LOG_ERROR, "EMU_FILE -> Could not open file");
         }
         fclose(file);
-        TraceLog(LOG_INFO, "EMU_FILE -> Unloaded file");
-    } else {
-        TraceLog(LOG_ERROR, "EMU_FILE -> Invalid file format, please load a valid Chip-8 ROM!");
-        UnloadDroppedFiles(dropped_file);
-        return -1;
     }
     UnloadDroppedFiles(dropped_file);
-    return 0;
+    return error_file();
 }
