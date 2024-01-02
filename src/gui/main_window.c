@@ -2,7 +2,7 @@
 //==============================================================================
 //    -  MIT License | main_window.c
 //
-//      Copyright (c) 2023, Tim <npxtune@scanf.dev>
+//      Copyright (c) 2023-2024, Tim <npxtune@scanf.dev>
 //      All rights served.
 //
 //     Permission is hereby granted, free of charge, to any person obtaining a copy
