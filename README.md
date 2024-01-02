@@ -87,6 +87,6 @@ No idea, good luck. If you figured it out, let me know per PR. Probably somethin
 ---
 #### Copyright & Licensing
 ```
-    Copyright (c) 2023 Tim <npxtune@scanf.dev> , All rights served.
+    Copyright (c) 2023-2024 Tim <npxtune@scanf.dev> , All rights served.
     This project is MIT licensed.
 ```
