@@ -65,7 +65,7 @@ void load_settings(options_config *config) {
         int32_t temp;
         for (int i = 0; i < items; ++i) {
             fgets(line, 100, file);
-            uint16_t color[4] = {0,0,0,0};
+            uint16_t color[4] = {0, 0, 0, 0};
             uint32_t counter = 0;
 
             // Skip line if it is not a value
@@ -116,7 +116,7 @@ void load_settings(options_config *config) {
 
                 case 3:
                     for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if(strncmp(&line[0],"true", sizeof(line[temp])) == 0) {
+                    if (strncmp(&line[0], "true", sizeof(line[temp])) == 0) {
                         config->show_debug = true;
                     } else {
                         config->show_debug = false;
@@ -125,7 +125,7 @@ void load_settings(options_config *config) {
 
                 case 4:
                     for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if(strncmp(&line[0],"true", sizeof(line[temp])) == 0) {
+                    if (strncmp(&line[0], "true", sizeof(line[temp])) == 0) {
                         config->show_fps = true;
                     } else {
                         config->show_fps = false;
@@ -134,8 +134,8 @@ void load_settings(options_config *config) {
 
                 case 5:
                     for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if(strncmp(&line[0],"0.", sizeof(line[temp])) == 0) {
-                        config->volume = (float)(line[2] - '0') / 10 + (float)(line[3] - '0') / 100;
+                    if (strncmp(&line[0], "0.", sizeof(line[temp])) == 0) {
+                        config->volume = (float) (line[2] - '0') / 10 + (float) (line[3] - '0') / 100;
                     } else {
                         config->volume = 1.0f;
                     }
