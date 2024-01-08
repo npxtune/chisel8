@@ -42,5 +42,17 @@ typedef struct Options_config{
     float volume;
 } options_config;
 
+typedef struct Interface_scaling{
+    int32_t window_width;
+    int32_t window_height;
+
+    float button_width;
+    float button_height;
+    float button_x;
+
+    int32_t font_size;
+} ui_scale;
+
 void create_config(options_config *config);
 void load_settings(options_config *config);
+int32_t write_settings(options_config *config);
