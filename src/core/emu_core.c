@@ -81,25 +81,25 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
         case (0x3):
             if (chip8->reg[X] == N2) {
-                chip8->pc+=2;
+                chip8->pc += 2;
             }
             break;
 
         case (0x4):
             if (chip8->reg[X] != N2) {
-                chip8->pc+=2;
+                chip8->pc += 2;
             }
             break;
 
         case (0x5):
-            if(chip8->reg[X] == chip8->reg[Y]) {
-                chip8->pc+=2;
+            if (chip8->reg[X] == chip8->reg[Y]) {
+                chip8->pc += 2;
             }
             break;
 
         case (0x9):
-            if(chip8->reg[X] != chip8->reg[Y]) {
-                chip8->pc+=2;
+            if (chip8->reg[X] != chip8->reg[Y]) {
+                chip8->pc += 2;
             }
             break;
 
@@ -115,27 +115,27 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             switch (N1) {
 
                 case (0x0):
-                    chip8->reg[X]=chip8->reg[Y];
+                    chip8->reg[X] = chip8->reg[Y];
                     break;
 
                 case (0x1):
-                    chip8->reg[X]|=chip8->reg[Y];
+                    chip8->reg[X] |= chip8->reg[Y];
                     chip8->reg[0xf] = 0x0;
                     break;
 
                 case (0x2):
-                    chip8->reg[X]&=chip8->reg[Y];
+                    chip8->reg[X] &= chip8->reg[Y];
                     chip8->reg[0xf] = 0x0;
                     break;
 
                 case (0x3):
-                    chip8->reg[X]^=chip8->reg[Y];
+                    chip8->reg[X] ^= chip8->reg[Y];
                     chip8->reg[0xf] = 0x0;
                     break;
 
                 case (0x4):
                     N1 = chip8->reg[0xf];
-                    chip8->reg[X]+=chip8->reg[Y];
+                    chip8->reg[X] += chip8->reg[Y];
                     if (N1 + chip8->reg[Y] > 255) {
                         chip8->reg[0xf] = 1;
                     } else {
@@ -145,7 +145,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
                 case (0x5):
                     N1 = chip8->reg[X];
-                    chip8->reg[X]-=chip8->reg[Y];
+                    chip8->reg[X] -= chip8->reg[Y];
                     if (N1 < chip8->reg[Y]) {
                         chip8->reg[0xF] = 0;
                     } else {
@@ -204,13 +204,13 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
             if (N2 == 0x9e) {
                 if (chip8->key == chip8->reg[X]) {
-                    chip8->pc+=2;
+                    chip8->pc += 2;
                     chip8->key = -1;
                 }
 
             } else if (N2 == 0xa1) {
                 if (chip8->key != chip8->reg[X]) {
-                    chip8->pc+=2;
+                    chip8->pc += 2;
                     chip8->key = -1;
                 }
 
@@ -223,21 +223,21 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             switch (N2) {
 
                 case (0x07):
-                    chip8->reg[X]=chip8->delay;
+                    chip8->reg[X] = chip8->delay;
                     break;
 
                 case (0x15):
-                    chip8->delay=chip8->reg[X];
+                    chip8->delay = chip8->reg[X];
                     break;
 
                 case (0x18):
-                    chip8->sound=chip8->reg[X];
+                    chip8->sound = chip8->reg[X];
                     break;
 
                 case (0x1e):
                     N1 = chip8->I;
                     chip8->I += chip8->reg[X];
-                    if (N1+chip8->reg[X] > 0x0FFF) {
+                    if (N1 + chip8->reg[X] > 0x0FFF) {
                         chip8->reg[0xf] = 1;
                     } else {
                         chip8->reg[0xf] = 0;
@@ -246,32 +246,33 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
                 case (0x0a):
                     if (chip8->key != -1) {
-                        chip8->reg[X]=chip8->key;
+                        chip8->reg[X] = chip8->key;
                     } else {
-                        chip8->pc-=2;
+                        chip8->pc -= 2;
                     }
                     break;
 
                 case (0x29):
-                    chip8->I = ((chip8->reg[X]&0xf)*5);
+                    chip8->I = ((chip8->reg[X] & 0xf) * 5);
                     break;
 
                 case (0x33):
                     N1 = chip8->reg[X];
-                    chip8->ram[(chip8->I)%RAM_SIZE] = N1 / 100;
-                    chip8->ram[(chip8->I+1)%RAM_SIZE] = N1 % (((chip8->ram[(chip8->I)%RAM_SIZE])*100))/ 10;
-                    chip8->ram[(chip8->I+2)%RAM_SIZE] = N1 % (((chip8->ram[(chip8->I)%RAM_SIZE])*100+(chip8->ram[(chip8->I+1)%RAM_SIZE])*10));
+                    chip8->ram[(chip8->I) % RAM_SIZE] = N1 / 100;
+                    chip8->ram[(chip8->I + 1) % RAM_SIZE] = N1 % (((chip8->ram[(chip8->I) % RAM_SIZE]) * 100)) / 10;
+                    chip8->ram[(chip8->I + 2) % RAM_SIZE] = N1 % (((chip8->ram[(chip8->I) % RAM_SIZE]) * 100 +
+                                                                   (chip8->ram[(chip8->I + 1) % RAM_SIZE]) * 10));
                     break;
 
                 case (0x55):
                     for (int i = 0x0; i <= X; ++i) {
-                        chip8->ram[(chip8->I+i)%RAM_SIZE] = chip8->reg[i];
+                        chip8->ram[(chip8->I + i) % RAM_SIZE] = chip8->reg[i];
                     }
                     break;
 
                 case (0x65):
                     for (int i = 0x0; i <= X; ++i) {
-                        chip8->reg[i] = chip8->ram[(chip8->I+i)%RAM_SIZE];
+                        chip8->reg[i] = chip8->ram[(chip8->I + i) % RAM_SIZE];
                     }
                     break;
 
@@ -291,7 +292,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                 uint8_t pixel = chip8->ram[chip8->I + y];
                 for (int x = 0; x < 8; ++x) {
                     if ((pixel & (0x80 >> x)) != 0) {
-                        if (X+x < DISPLAY_WIDTH && Y+y < DISPLAY_HEIGHT) {
+                        if (X + x < DISPLAY_WIDTH && Y + y < DISPLAY_HEIGHT) {
                             if (chip8->pixels[X + x][Y + y] == 1) {
                                 chip8->reg[0xF] = 1;
                             }

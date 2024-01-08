@@ -77,14 +77,15 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
 //  This is from a raylib audio example :)
 //  Audio frequency values
 float frequency = 440.0f, audio_frequency = 440.0f, sine_index = 0.0f, sample = 35000.0f;
+
 void generate_beep(void *buffer, unsigned int frames) {
     audio_frequency = frequency + (audio_frequency - frequency) * 0.95f;
 
     float increase = audio_frequency / sample;
-    short *d = (short *)buffer;
+    short *d = (short *) buffer;
 
     for (unsigned int i = 0; i < frames; i++) {
-        d[i] = (short)(16000.0f*sinf(2 * PI * sine_index));
+        d[i] = (short) (16000.0f * sinf(2 * PI * sine_index));
         sine_index += increase;
         if (sine_index > 1.0f) sine_index -= 1.0f;
     }
@@ -137,29 +138,29 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
 
-        if(IsWindowResized()) {
+        if (IsWindowResized()) {
             config->display_scaling = GetScreenWidth() / DISPLAY_WIDTH;
             scale->window_width = DISPLAY_WIDTH * config->display_scaling;
             scale->window_height = DISPLAY_HEIGHT * config->display_scaling;
             SetWindowSize(scale->window_width, scale->window_height);
 
-            scale->button_width = (float)(scale->window_width/4.8);
-            scale->button_height = (float)((float)scale->window_height/16);
-            scale->button_x = (float)((float)scale->window_width/2-(scale->window_width/9.6));
-            scale->font_size = (scale->window_height/12);
+            scale->button_width = (float) (scale->window_width / 4.8);
+            scale->button_height = (float) ((float) scale->window_height / 16);
+            scale->button_x = (float) ((float) scale->window_width / 2 - (scale->window_width / 9.6));
+            scale->font_size = (scale->window_height / 12);
         }
 
         UnloadDroppedFiles(LoadDroppedFiles());
 
         // Draw Pixels from virtual Texture
-        DrawTextureEx(chip8.display, (Vector2){0, 0}, 0, (float)config->display_scaling, WHITE);
+        DrawTextureEx(chip8.display, (Vector2) {0, 0}, 0, (float) config->display_scaling, WHITE);
 
-        if(config->show_fps) {
-            DrawText(TextFormat("%dhz", GetFPS()+1), (int)config->display_scaling,(int)config->display_scaling/2,
-                     (int)(GetScreenHeight()/(config->display_scaling*1.5)), DARKGREEN);
+        if (config->show_fps) {
+            DrawText(TextFormat("%dhz", GetFPS() + 1), (int) config->display_scaling, (int) config->display_scaling / 2,
+                     (int) (GetScreenHeight() / (config->display_scaling * 1.5)), DARKGREEN);
         }
 
-        for (int i = 0; i < (int)(CLOCK_RATE/REFRESH_RATE); ++i) {
+        for (int i = 0; i < (int) (CLOCK_RATE / REFRESH_RATE); ++i) {
             check_input(&chip8);
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
