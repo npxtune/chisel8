@@ -76,7 +76,7 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
 
 //  This is from a raylib audio example :)
 //  Audio frequency values
-float frequency = 440.0f, audio_frequency = 440.0f, sine_index = 0.0f, sample = 50000.0f;
+float frequency = 440.0f, audio_frequency = 440.0f, sine_index = 0.0f, sample = 35000.0f;
 void generate_beep(void *buffer, unsigned int frames) {
     audio_frequency = frequency + (audio_frequency - frequency) * 0.95f;
 
@@ -90,7 +90,7 @@ void generate_beep(void *buffer, unsigned int frames) {
     }
 }
 
-int32_t emu_main(options_config *config) {
+int32_t emu_main(options_config *config, ui_scale *scale) {
     emu chip8;
     bool undefined = false;
 
@@ -128,7 +128,6 @@ int32_t emu_main(options_config *config) {
     chip8.delay = 0, chip8.sound = 0;
 
     chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
-    ClearWindowState(FLAG_WINDOW_RESIZABLE);
     InitAudioDevice();
 
     AudioStream beep = LoadAudioStream(22050, 16, 1);
@@ -137,6 +136,18 @@ int32_t emu_main(options_config *config) {
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
+
+        if(IsWindowResized()) {
+            config->display_scaling = GetScreenWidth() / DISPLAY_WIDTH;
+            scale->window_width = DISPLAY_WIDTH * config->display_scaling;
+            scale->window_height = DISPLAY_HEIGHT * config->display_scaling;
+            SetWindowSize(scale->window_width, scale->window_height);
+
+            scale->button_width = (float)(scale->window_width/4.8);
+            scale->button_height = (float)((float)scale->window_height/16);
+            scale->button_x = (float)((float)scale->window_width/2-(scale->window_width/9.6));
+            scale->font_size = (scale->window_height/12);
+        }
 
         UnloadDroppedFiles(LoadDroppedFiles());
 

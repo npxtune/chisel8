@@ -36,4 +36,4 @@
 
 void emu_stop(emu *chip8, AudioStream beep);
 void check_input(emu *chip8);
-int32_t emu_main(options_config *config);
+int32_t emu_main(options_config *config, ui_scale *scale);

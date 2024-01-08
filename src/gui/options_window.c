@@ -150,6 +150,10 @@ void load_settings(options_config *config) {
         // CREATE OPTIONS
         create_config(config);
     }
-    printf("%f\n", config->volume);
     fclose(file);
+}
+
+int32_t write_settings(options_config *config) {
+    //  TODO
+    return 0;
 }

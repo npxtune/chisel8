@@ -34,6 +34,8 @@
 #include "gui/main_window.h"
 
 void main_window(options_config *config) {
+    ui_scale scale;
+    float temp;
 
     //  Show debug info?
     if(config->show_debug == true) {
@@ -42,18 +44,18 @@ void main_window(options_config *config) {
         SetTraceLogLevel(LOG_ERROR);
     }
 
-    int32_t window_width = DISPLAY_WIDTH * config->display_scaling;
-    int32_t window_height = DISPLAY_HEIGHT * config->display_scaling;
+    scale.window_width = DISPLAY_WIDTH * config->display_scaling;
+    scale.window_height = DISPLAY_HEIGHT * config->display_scaling;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
-    InitWindow(window_width,window_height,WINDOW_TITLE VERSION);
+    InitWindow(scale.window_width,scale.window_height,WINDOW_TITLE VERSION);
 
-    float button_width = (float)(window_width/4.8);
-    float button_height = (float)((float)window_height/16);
-    float button_x = (float)((float)window_width/2-(window_width/9.6));
+    scale.button_width = (float)(scale.window_width/4.8);
+    scale.button_height = (float)((float)scale.window_height/16);
+    scale.button_x = (float)((float)scale.window_width/2-(scale.window_width/9.6));
 
-    int32_t font_size = (window_height/12);
+    scale.font_size = (scale.window_height/12);
     GuiLoadStyleDark();
 
     enum menu_state_counter {normal, options, init};
@@ -66,19 +68,19 @@ void main_window(options_config *config) {
 
         if(IsWindowResized()) {
             config->display_scaling = GetScreenWidth() / DISPLAY_WIDTH;
-            window_width = DISPLAY_WIDTH * config->display_scaling;
-            window_height = DISPLAY_HEIGHT * config->display_scaling;
-            SetWindowSize(window_width, window_height);
+            scale.window_width = DISPLAY_WIDTH * config->display_scaling;
+            scale.window_height = DISPLAY_HEIGHT * config->display_scaling;
+            SetWindowSize(scale.window_width, scale.window_height);
 
-            button_width = (float)(window_width/4.8);
-            button_height = (float)((float)window_height/16);
-            button_x = (float)((float)window_width/2-(window_width/9.6));
-            font_size = (window_height/12);
+            scale.button_width = (float)(scale.window_width/4.8);
+            scale.button_height = (float)((float)scale.window_height/16);
+            scale.button_x = (float)((float)scale.window_width/2-(scale.window_width/9.6));
+            scale.font_size = (scale.window_height/12);
         }
 
         if (IsFileDropped()) {  // Initialize Emulation
             EndDrawing();
-            if(emu_main(config) == -2) {break;}
+            if(emu_main(config, &scale) == -2) {break;}
             menu_state = normal;
         }
 
@@ -87,19 +89,19 @@ void main_window(options_config *config) {
         switch (menu_state) {
             /*-------------------------------------------------------------------------------------------------------------*/
             case (normal):
-                DrawText("Chisel8 Emulator", window_width/2-(font_size*4), (window_height/12), font_size, RAYWHITE);
+                DrawText("Chisel8 Emulator", scale.window_width/2-(scale.font_size*4), (scale.window_height/12), scale.font_size, RAYWHITE);
 
-                if (GuiButton((Rectangle){ button_x, window_height/2-window_height/6-10, button_width, button_height },
-                              GuiIconText(ICON_CPU, "Load EMU") )) {
+                if (GuiButton((Rectangle){ scale.button_x, scale.window_height/2-scale.window_height/6-10, scale.button_width, scale.button_height },
+                              GuiIconText(ICON_CPU, "Load ROM") )) {
                     menu_state = init;
                 }
 
-                if (GuiButton((Rectangle){ button_x, window_height/2-window_height/16, button_width, button_height },
+                if (GuiButton((Rectangle){ scale.button_x, scale.window_height/2-scale.window_height/16, scale.button_width, scale.button_height },
                               GuiIconText(ICON_GEAR, "Settings"))) {
                     menu_state = options;
                 }
 
-                if (GuiButton((Rectangle){ button_x, window_height-(window_height/6), button_width, button_height },
+                if (GuiButton((Rectangle){ scale.button_x, scale.window_height-(scale.window_height/6), scale.button_width, scale.button_height },
                               GuiIconText(ICON_EXIT, "Quit"))) {
                     EndDrawing();
                     CloseWindow();
@@ -113,8 +115,22 @@ void main_window(options_config *config) {
                 // TODO: Call function from options_window source file and actually add options to choose from
                 // TODO: Should allow the user to change the window scaling and other options...
 
-                DrawText("TODO...", window_width/2-(font_size*1.5), (window_height/12), font_size, RAYWHITE);
-                if (GuiButton((Rectangle){ button_x, window_height-(window_height/6), button_width, button_height },
+                DrawText("Settings", scale.window_width/2-(scale.font_size*2), (scale.window_height/12), scale.font_size, RAYWHITE);
+
+                if (config->volume != 0) {
+                    if (GuiButton((Rectangle){ scale.button_x, scale.window_height-(scale.window_height/2), scale.button_width, scale.button_height },
+                                  GuiIconText(ICON_AUDIO, "Mute Audio"))) {
+                        temp = config->volume;
+                        config->volume = 0.0f;
+                    }
+                } else {
+                    if (GuiButton((Rectangle){ scale.button_x, scale.window_height-(scale.window_height/2), scale.button_width, scale.button_height },
+                                  GuiIconText(ICON_AUDIO, "Unmute Audio"))) {
+                        config->volume = temp;
+                    }
+                }
+
+                if (GuiButton((Rectangle){ scale.button_x, scale.window_height-(scale.window_height/6), scale.button_width, scale.button_height },
                               GuiIconText(ICON_REREDO_FILL, "Return"))) {
                     menu_state = normal;
                     break;
@@ -124,18 +140,18 @@ void main_window(options_config *config) {
             /*-------------------------------------------------------------------------------------------------------------*/
 
             case (init):
-                DrawRectangle(0, 0, window_width, window_height, Fade(RAYWHITE, 0.2f));
-                DrawText("Please drag a ROM file into the window", window_width/2-(font_size*10)+(font_size/2),
-                         (window_height/2)-font_size*1.5, font_size, RAYWHITE);
+                DrawRectangle(0, 0, scale.window_width, scale.window_height, Fade(RAYWHITE, 0.2f));
+                DrawText("Please drag a ROM file into the window", scale.window_width/2-(scale.font_size*10)+(scale.font_size/2),
+                         (scale.window_height/2)-scale.font_size*1.5, scale.font_size, RAYWHITE);
 
-                if (GuiButton((Rectangle){ button_x, window_height-(window_height/6), button_width, button_height },
+                if (GuiButton((Rectangle){ scale.button_x, scale.window_height-(scale.window_height/6), scale.button_width, scale.button_height },
                               GuiIconText(ICON_REREDO_FILL, "Return"))) {
                     menu_state = normal;
                     break;
                 }
                 if (IsFileDropped()) {  // Initialize Emulation
                     EndDrawing();
-                    if(emu_main(config) == -2) {break;}
+                    if(emu_main(config, &scale) == -2) {break;}
                     menu_state = normal;
                     break;
                 }
