@@ -63,7 +63,7 @@ void load_settings(options_config *config) {
         // READ OPTIONS
         char line[100];
         int32_t temp;
-        for (int i = 0; i < items; ++i) {
+        for (int32_t i = 0; i < items; ++i) {
             fgets(line, 100, file);
             uint16_t color[4] = {0, 0, 0, 0};
             uint32_t counter = 0;
@@ -76,7 +76,7 @@ void load_settings(options_config *config) {
 
             switch (i) {
                 case 0:
-                    for (int j = 0; line[j] != ';'; ++j) {
+                    for (int32_t j = 0; line[j] != ';'; ++j) {
                         if (isnumber(line[j]) && color[counter] > 0) {
                             color[counter] = (color[counter] * 10) + line[j] - '0';
                         } else if (isnumber(line[j])) {
@@ -90,7 +90,7 @@ void load_settings(options_config *config) {
                     break;
 
                 case 1:
-                    for (int j = 0; line[j] != ';'; ++j) {
+                    for (int32_t j = 0; line[j] != ';'; ++j) {
                         if (isnumber(line[j]) && color[counter] > 0) {
                             color[counter] = (color[counter] * 10) + line[j] - '0';
                         } else if (isnumber(line[j])) {
@@ -104,7 +104,7 @@ void load_settings(options_config *config) {
                     break;
 
                 case 2:
-                    for (int j = 0; line[j] != ';'; ++j) {
+                    for (int32_t j = 0; line[j] != ';'; ++j) {
                         if (isnumber(line[j]) && color[0] > 0) {
                             color[0] = (color[0] * 10) + line[j] - '0';
                         } else if (isnumber(line[j])) {
