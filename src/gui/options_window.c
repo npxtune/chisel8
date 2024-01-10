@@ -77,9 +77,9 @@ void load_settings(options_config *config) {
             switch (i) {
                 case 0:
                     for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isnumber(line[j]) && color[counter] > 0) {
+                        if (isdigit(line[j]) && color[counter] > 0) {
                             color[counter] = (color[counter] * 10) + line[j] - '0';
-                        } else if (isnumber(line[j])) {
+                        } else if (isdigit(line[j])) {
                             color[counter] = line[j] - '0';
                         }
                         if (line[j] == ',') {
@@ -91,9 +91,9 @@ void load_settings(options_config *config) {
 
                 case 1:
                     for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isnumber(line[j]) && color[counter] > 0) {
+                        if (isdigit(line[j]) && color[counter] > 0) {
                             color[counter] = (color[counter] * 10) + line[j] - '0';
-                        } else if (isnumber(line[j])) {
+                        } else if (isdigit(line[j])) {
                             color[counter] = line[j] - '0';
                         }
                         if (line[j] == ',') {
@@ -105,9 +105,9 @@ void load_settings(options_config *config) {
 
                 case 2:
                     for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isnumber(line[j]) && color[0] > 0) {
+                        if (isdigit(line[j]) && color[0] > 0) {
                             color[0] = (color[0] * 10) + line[j] - '0';
-                        } else if (isnumber(line[j])) {
+                        } else if (isdigit(line[j])) {
                             color[0] = line[j] - '0';
                         }
                     }
