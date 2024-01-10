@@ -34,6 +34,7 @@ void emu_stop(emu *chip8, AudioStream beep) {
     ClearBackground(BLACK);
     TraceLog(LOG_INFO, "EMU_MAIN -> Stopped emulation");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
+    SetExitKey(KEY_ESCAPE);
 }
 
 void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but nope...
@@ -78,13 +79,13 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
 //  Audio frequency values
 float frequency = 440.0f, audio_frequency = 440.0f, sine_index = 0.0f, sample = 35000.0f;
 
-void generate_beep(void *buffer, unsigned int frames) {
+void generate_beep(void *buffer, uint32_t frames) {
     audio_frequency = frequency + (audio_frequency - frequency) * 0.95f;
 
     float increase = audio_frequency / sample;
     short *d = (short *) buffer;
 
-    for (unsigned int i = 0; i < frames; i++) {
+    for (uint32_t i = 0; i < frames; i++) {
         d[i] = (short) (16000.0f * sinf(2 * PI * sine_index));
         sine_index += increase;
         if (sine_index > 1.0f) sine_index -= 1.0f;
@@ -96,16 +97,16 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
     bool undefined = false;
 
     TraceLog(LOG_INFO, "EMU_MAIN -> Starting emulation");
-    for (int i = 0; i < RAM_SIZE; ++i) {
+    for (int32_t i = 0; i < RAM_SIZE; ++i) {
         chip8.ram[i] = 0;
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared RAM");
-    for (int i = 0; i < STACK_SIZE; ++i) {
+    for (int32_t i = 0; i < STACK_SIZE; ++i) {
         chip8.stack[i] = 0;
     }
     chip8.i_stack = -1;
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared Stack");
-    for (int i = 0; i < REGISTER_SIZE; ++i) {
+    for (int32_t i = 0; i < REGISTER_SIZE; ++i) {
         chip8.reg[i] = 0;
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared registers");
@@ -113,15 +114,15 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
         TraceLog(LOG_INFO, "EMU_MAIN -> Emulation stopped");
         return -1;
     }
-    for (int i = 0; i < FONT_SIZE; ++i) {
+    for (int32_t i = 0; i < FONT_SIZE; ++i) {
         chip8.ram[i] = FONT[i];
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Loaded FONT into RAM");
     chip8.pc = 0x200;
     TraceLog(LOG_INFO, "EMU_MAIN -> Set pc to Address 0x200");
 
-    for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-        for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+    for (int32_t x = 0; x < DISPLAY_WIDTH; ++x) {
+        for (int32_t y = 0; y < DISPLAY_HEIGHT; ++y) {
             chip8.pixels[x][y] = 0;
         }
     }
@@ -134,6 +135,8 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
     AudioStream beep = LoadAudioStream(22050, 16, 1);
     SetAudioStreamCallback(beep, generate_beep);
     SetAudioStreamVolume(beep, config->volume);
+
+    SetExitKey(KEY_NULL);
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
@@ -156,11 +159,11 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
         DrawTextureEx(chip8.display, (Vector2) {0, 0}, 0, (float) config->display_scaling, WHITE);
 
         if (config->show_fps) {
-            DrawText(TextFormat("%dhz", GetFPS() + 1), (int) config->display_scaling, (int) config->display_scaling / 2,
-                     (int) (GetScreenHeight() / (config->display_scaling * 1.5)), DARKGREEN);
+            DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling, (int32_t) config->display_scaling / 2,
+                     (int32_t) (GetScreenHeight() / (config->display_scaling * 1.5)), DARKGREEN);
         }
 
-        for (int i = 0; i < (int) (CLOCK_RATE / REFRESH_RATE); ++i) {
+        for (int32_t i = 0; i < (int32_t) (CLOCK_RATE / REFRESH_RATE); ++i) {
             check_input(&chip8);
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;

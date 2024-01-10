@@ -53,8 +53,8 @@ int32_t decode_exec(emu *chip8, options_config *config) {
     switch (chip8->opcode >> 12) {            // Check first hex nibble & execute opcode accordingly
         case (0x0):
             if (chip8->opcode == 0x00e0) {
-                for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-                    for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+                for (int32_t x = 0; x < DISPLAY_WIDTH; ++x) {
+                    for (int32_t y = 0; y < DISPLAY_HEIGHT; ++y) {
                         chip8->pixels[x][y] = 0;
                     }
                 }
@@ -265,13 +265,13 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                     break;
 
                 case (0x55):
-                    for (int i = 0x0; i <= X; ++i) {
+                    for (int32_t i = 0x0; i <= X; ++i) {
                         chip8->ram[(chip8->I + i) % RAM_SIZE] = chip8->reg[i];
                     }
                     break;
 
                 case (0x65):
-                    for (int i = 0x0; i <= X; ++i) {
+                    for (int32_t i = 0x0; i <= X; ++i) {
                         chip8->reg[i] = chip8->ram[(chip8->I + i) % RAM_SIZE];
                     }
                     break;
@@ -288,9 +288,9 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
             chip8->reg[0xF] = 0;
 
-            for (int y = 0; y < N1; ++y) {
+            for (int32_t y = 0; y < N1; ++y) {
                 uint8_t pixel = chip8->ram[chip8->I + y];
-                for (int x = 0; x < 8; ++x) {
+                for (int32_t x = 0; x < 8; ++x) {
                     if ((pixel & (0x80 >> x)) != 0) {
                         if (X + x < DISPLAY_WIDTH && Y + y < DISPLAY_HEIGHT) {
                             if (chip8->pixels[X + x][Y + y] == 1) {
@@ -304,8 +304,8 @@ int32_t decode_exec(emu *chip8, options_config *config) {
 
             // Save pixels into a virtual Texture
             Image pixels = GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color);
-            for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-                for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+            for (int32_t y = 0; y < DISPLAY_HEIGHT; ++y) {
+                for (int32_t x = 0; x < DISPLAY_WIDTH; ++x) {
                     if (chip8->pixels[x][y] == 1) {
                         ImageDrawPixel(&pixels, x, y, config->pixel_color);
                     }
