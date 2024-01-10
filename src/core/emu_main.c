@@ -163,9 +163,9 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
                                     (GetScreenHeight() - scale->window_height) / 2, scale->window_width,
                                     scale->window_height}, (Vector2) {0, 0}, 0, WHITE);
 
-        DrawRectangleLines(((GetScreenWidth() - scale->window_width) / 2),
-                           (((GetScreenHeight() - scale->window_height) / 2)), scale->window_width,
-                           scale->window_height, DARKGRAY);
+        DrawRectangleLines(((GetScreenWidth() - scale->window_width) / 2) - 1,
+                           (((GetScreenHeight() - scale->window_height) / 2)) - 1, scale->window_width + 2,
+                           scale->window_height + 2, DARKGRAY);
 
         if (config->show_fps) {
             DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling,
