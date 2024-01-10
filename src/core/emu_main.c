@@ -140,26 +140,36 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
 
     while (!IsKeyPressed(KEY_ESCAPE)) {
         BeginDrawing();
+        ClearBackground(BLACK);
 
         if (IsWindowResized()) {
-            config->display_scaling = GetScreenWidth() / DISPLAY_WIDTH;
+            config->display_scaling = (uint32_t) fminf(GetScreenWidth() / (float) DISPLAY_WIDTH,
+                                                       GetScreenHeight() / (float) DISPLAY_HEIGHT);
+
             scale->window_width = DISPLAY_WIDTH * config->display_scaling;
             scale->window_height = DISPLAY_HEIGHT * config->display_scaling;
-            SetWindowSize(scale->window_width, scale->window_height);
 
-            scale->button_width = (float) (scale->window_width / 4.8);
-            scale->button_height = (float) ((float) scale->window_height / 16);
-            scale->button_x = (float) ((float) scale->window_width / 2 - (scale->window_width / 9.6));
-            scale->font_size = (scale->window_height / 12);
+            scale->button_width = (float) (GetScreenWidth() / 4.8);
+            scale->button_height = (float) ((float) GetScreenHeight() / 16);
+            scale->button_x = (float) ((float) GetScreenWidth() / 2 - (GetScreenWidth() / 9.6));
+            scale->font_size = (GetScreenWidth() / (int32_t) config->display_scaling);
         }
 
         UnloadDroppedFiles(LoadDroppedFiles());
 
         // Draw Pixels from virtual Texture
-        DrawTextureEx(chip8.display, (Vector2) {0, 0}, 0, (float) config->display_scaling, WHITE);
+        DrawTexturePro(chip8.display, (Rectangle) {0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT},
+                       (Rectangle) {(GetScreenWidth() - scale->window_width) / 2,
+                                    (GetScreenHeight() - scale->window_height) / 2, scale->window_width,
+                                    scale->window_height}, (Vector2) {0, 0}, 0, WHITE);
+
+        DrawRectangleLines(((GetScreenWidth() - scale->window_width) / 2),
+                           (((GetScreenHeight() - scale->window_height) / 2)), scale->window_width,
+                           scale->window_height, DARKGRAY);
 
         if (config->show_fps) {
-            DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling, (int32_t) config->display_scaling / 2,
+            DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling,
+                     (int32_t) config->display_scaling / 2,
                      (int32_t) (GetScreenHeight() / (config->display_scaling * 1.5)), DARKGREEN);
         }
 
