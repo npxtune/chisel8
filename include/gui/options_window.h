@@ -56,3 +56,4 @@ typedef struct Interface_scaling{
 void create_config(options_config *config);
 void load_settings(options_config *config);
 int32_t write_settings(options_config *config);
+int32_t options_window(options_config *config, ui_scale *scale);

@@ -25,12 +25,13 @@
 //==============================================================================
 
 #include "gui/options_window.h"
+#include "raygui.h"
 
 //  DEFAULT SETTINGS VALUES
 
 #define color_0     "  0,  0,  0, 1;    # Background color\n"       // Default color is BLACK
 #define color_1     "255,255,255, 1;    # Pixel color\n"            // Default color is WHITE
-#define scale       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
+#define scaling       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
 #define debug       "false;             # Show debugging info in terminal\n"
 #define fps         "false;             # Show Frames per Second in the top left\n"
 #define audio       "0.50;               # Set the volume of the Chip-8's beep\n"
@@ -42,7 +43,7 @@ void create_config(options_config *config) {
 
     fwrite(color_0, strlen(color_0), 1, file);
     fwrite(color_1, strlen(color_1), 1, file);
-    fwrite(scale, strlen(scale), 1, file);
+    fwrite(scaling, strlen(scaling), 1, file);
     fwrite(debug, strlen(debug), 1, file);
     fwrite(fps, strlen(fps), 1, file);
     fwrite(audio, strlen(audio), 1, file);
@@ -156,4 +157,30 @@ void load_settings(options_config *config) {
 int32_t write_settings(options_config *config) {
     //  TODO
     return 0;
+}
+
+float temp;
+
+int32_t options_window(options_config *config, ui_scale *scale) {
+
+    DrawText("Settings", GetScreenWidth() / 2 - (scale->font_size * 2), (GetScreenHeight() / 12),
+             scale->font_size, RAYWHITE);
+
+    //      AUDIO VOLUME SLIDER
+    GuiSliderBar((Rectangle) {(scale->window_width / 2) - 250, scale->window_height / 4, 500, 25},
+                 GuiIconText(ICON_AUDIO, "Volume "),
+                 TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
+
+    //  TODO: THIS IS VERY BROKEN!!!        HIDE COLOR PICKER BEHIND BUTTON?
+
+    GuiColorPicker((Rectangle) {100, 175, 200, 200}, "TEXT", &config->background_color);
+
+    GuiColorPicker((Rectangle) {600, 175, 200, 200}, "TEXT", &config->pixel_color);
+
+    if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 6),
+                               scale->button_width, scale->button_height},
+                  GuiIconText(ICON_REREDO_FILL, "Return"))) {
+        return 0;
+    }
+    return 1;
 }
