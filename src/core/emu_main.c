@@ -25,12 +25,13 @@
 //==============================================================================
 
 #include "core/emu_main.h"
+#include "raygui.h"
 
 void emu_stop(emu *chip8, AudioStream beep) {
     EndDrawing();
-    UnloadTexture(chip8->display);
     UnloadAudioStream(beep);
     CloseAudioDevice();
+    UnloadTexture(chip8->display);
     ClearBackground(BLACK);
     TraceLog(LOG_INFO, "EMU_MAIN -> Stopped emulation");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
@@ -92,47 +93,57 @@ void generate_beep(void *buffer, uint32_t frames) {
     }
 }
 
-int32_t emu_main(options_config *config, ui_scale *scale) {
-    emu chip8;
-    bool undefined = false;
+int32_t emu_init(emu *chip8, options_config *config) {
+    chip8->display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
 
     TraceLog(LOG_INFO, "EMU_MAIN -> Starting emulation");
     for (int32_t i = 0; i < RAM_SIZE; ++i) {
-        chip8.ram[i] = 0;
+        chip8->ram[i] = 0;
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared RAM");
     for (int32_t i = 0; i < STACK_SIZE; ++i) {
-        chip8.stack[i] = 0;
+        chip8->stack[i] = 0;
     }
-    chip8.i_stack = -1;
+    chip8->i_stack = -1;
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared Stack");
     for (int32_t i = 0; i < REGISTER_SIZE; ++i) {
-        chip8.reg[i] = 0;
+        chip8->reg[i] = 0;
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Cleared registers");
-    if (gui_load_file(&chip8) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
+    if (gui_load_file(chip8) == -1) { // LOAD DROPPED FILE, IF NOT A ROM RETURN
         TraceLog(LOG_INFO, "EMU_MAIN -> Emulation stopped");
         return -1;
     }
     for (int32_t i = 0; i < FONT_SIZE; ++i) {
-        chip8.ram[i] = FONT[i];
+        chip8->ram[i] = FONT[i];
     }
     TraceLog(LOG_INFO, "EMU_MAIN -> Loaded FONT into RAM");
-    chip8.pc = 0x200;
+    chip8->pc = 0x200;
     TraceLog(LOG_INFO, "EMU_MAIN -> Set pc to Address 0x200");
 
     for (int32_t x = 0; x < DISPLAY_WIDTH; ++x) {
         for (int32_t y = 0; y < DISPLAY_HEIGHT; ++y) {
-            chip8.pixels[x][y] = 0;
+            chip8->pixels[x][y] = 0;
         }
     }
 
-    chip8.delay = 0, chip8.sound = 0;
+    chip8->delay = 0, chip8->sound = 0;
 
-    chip8.display = LoadTextureFromImage(GenImageColor(DISPLAY_WIDTH, DISPLAY_HEIGHT, config->background_color));
+    return 0;
+}
+
+int32_t emu_main(options_config *config, ui_scale *scale) {
+    emu chip8;
+    bool undefined = false;
+
     InitAudioDevice();
-
     AudioStream beep = LoadAudioStream(22050, 16, 1);
+
+    if (emu_init(&chip8, config) == -1) {
+        emu_stop(&chip8, beep);
+        return -1;
+    }
+
     SetAudioStreamCallback(beep, generate_beep);
     SetAudioStreamVolume(beep, config->volume);
 
@@ -142,7 +153,7 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        if (IsWindowResized()) {
+        if (IsWindowResized()) {    //  Magic to enable dynamic scaling
             config->display_scaling = (uint32_t) fminf(GetScreenWidth() / (float) DISPLAY_WIDTH,
                                                        GetScreenHeight() / (float) DISPLAY_HEIGHT);
 
@@ -152,7 +163,10 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
             scale->button_width = (float) (GetScreenWidth() / 4.8);
             scale->button_height = (float) ((float) GetScreenHeight() / 16);
             scale->button_x = (float) ((float) GetScreenWidth() / 2 - (GetScreenWidth() / 9.6));
-            scale->font_size = (GetScreenWidth() / (int32_t) config->display_scaling);
+            scale->font_size = (scale->window_width / scale->window_height) * (int32_t) config->display_scaling;
+
+            GuiSetStyle(DEFAULT, TEXT_SIZE, (int32_t) (scale->font_size / 1.8));
+            GuiSetIconScale((int32_t) (scale->font_size / 1.8) / 16);
         }
 
         UnloadDroppedFiles(LoadDroppedFiles());
@@ -170,7 +184,7 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
         if (config->show_fps) {
             DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling,
                      (int32_t) config->display_scaling / 2,
-                     (int32_t) (GetScreenHeight() / (config->display_scaling * 1.5)), DARKGREEN);
+                     (int32_t) (scale->font_size / 1.8), DARKGREEN);
         }
 
         for (int32_t i = 0; i < (int32_t) (CLOCK_RATE / REFRESH_RATE); ++i) {

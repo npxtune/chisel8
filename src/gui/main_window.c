@@ -36,7 +36,6 @@
 
 void main_window(options_config *config) {
     ui_scale scale;
-    float temp;
 
     //  Show debug info?
     if (config->show_debug == true) {
@@ -56,7 +55,7 @@ void main_window(options_config *config) {
     scale.button_height = (float) ((float) GetScreenHeight() / 16);
     scale.button_x = (float) ((float) scale.window_width / 2 - (scale.window_width / 9.6));
 
-    scale.font_size = (GetScreenHeight() / (int32_t)config->display_scaling);
+    scale.font_size = (GetScreenHeight() / (int32_t) config->display_scaling);
     GuiLoadStyleDark();
 
     enum menu_state_counter {
@@ -69,7 +68,7 @@ void main_window(options_config *config) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        if (IsWindowResized()) {
+        if (IsWindowResized()) {    //  Magic to enable dynamic scaling
             config->display_scaling = (uint32_t) fminf(GetScreenWidth() / (float) DISPLAY_WIDTH,
                                                        GetScreenHeight() / (float) DISPLAY_HEIGHT);
 
@@ -79,7 +78,10 @@ void main_window(options_config *config) {
             scale.button_width = (float) (GetScreenWidth() / 4.8);
             scale.button_height = (float) ((float) GetScreenHeight() / 16);
             scale.button_x = (float) ((float) GetScreenWidth() / 2 - (GetScreenWidth() / 9.6));
-            scale.font_size = (GetScreenWidth() / (int32_t) config->display_scaling);
+            scale.font_size = (scale.window_width / scale.window_height) * (int32_t) config->display_scaling;
+
+            GuiSetStyle(DEFAULT, TEXT_SIZE, (int32_t) (scale.font_size / 1.8));
+            GuiSetIconScale((int32_t) (scale.font_size / 1.8) / 16);
         }
 
         if (IsFileDropped()) {  // Initialize Emulation
@@ -120,33 +122,7 @@ void main_window(options_config *config) {
                 /*-------------------------------------------------------------------------------------------------------------*/
 
             case (options):
-                // TODO: Call function from options_window source file and actually add options to choose from
-                // TODO: Should allow the user to change the window scaling and other options...
-
-                DrawText("Settings", GetScreenWidth() / 2 - (scale.font_size * 2), (GetScreenHeight() / 12),
-                         scale.font_size, RAYWHITE);
-
-                if (config->volume != 0) {
-                    if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 2),
-                                               scale.button_width, scale.button_height},
-                                  GuiIconText(ICON_AUDIO, "Mute Audio"))) {
-                        temp = config->volume;
-                        config->volume = 0.0f;
-                    }
-                } else {
-                    if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 2),
-                                               scale.button_width, scale.button_height},
-                                  GuiIconText(ICON_AUDIO, "Unmute Audio"))) {
-                        config->volume = temp;
-                    }
-                }
-
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 6),
-                                           scale.button_width, scale.button_height},
-                              GuiIconText(ICON_REREDO_FILL, "Return"))) {
-                    menu_state = normal;
-                    break;
-                }
+                menu_state = options_window(config, &scale);
                 break;
 
                 /*-------------------------------------------------------------------------------------------------------------*/
