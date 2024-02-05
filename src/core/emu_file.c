@@ -33,10 +33,10 @@ int32_t gui_load_file(emu *chip8) {
 
         if (file != NULL) {
             SetWindowTitle(GetFileName(*dropped_file.paths));
-            TraceLog(LOG_INFO, "EMU_FILE -> Loading ROM into ram");
+            TraceLog(LOG_INFO, "EMU_FILE -> Loading ROM into RAM");
 
             if ((fread(chip8->ram + 0x200, 1, RAM_SIZE, file)) > 0) {
-                TraceLog(LOG_INFO, "EMU_FILE -> ROM was loaded into ram");
+                TraceLog(LOG_INFO, "EMU_FILE -> ROM was loaded into RAM");
                 fclose(file);
                 UnloadDroppedFiles(dropped_file);
                 return 0;

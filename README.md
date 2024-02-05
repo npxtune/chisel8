@@ -22,7 +22,7 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 - [X] Supports all opcodes for the original [Chip-8](https://emu.gulrak.net/reference/opcodes/) system
 - [X] Settings.txt to change background and pixel color values as well as the display scaling
 - [X] Chip-8 Audio emulation (it's just a beep...)
-- [X] Correct keypad input (currently wonky...)
+- [X] Correct keypad input
 - [ ] Settings panel to change color, display scale and debug/FPS info in the application
 - [ ] Loading previous ROM files for quick access via "Load ROM"
 - *Scrapped*: ~~External Debug window to show RAM contents, fetched/executed opcodes etc.~~
@@ -82,7 +82,32 @@ the ANGLE dylib files into the `build` dir, so it can load them. Remember to run
 
 ---
 ### Windows
-No idea, good luck. If you figured it out, let me know per PR. Probably something similair to the steps above.
+**WARNING:**    I do not own a device that runs on Windows. These instructions might not work.
+If there are any issues, feel free to open an issue & PR request.
+
+**Requirements:** 
+- MinGW-w64 (https://www.mingw-w64.org/)
+- CMake (https://cmake.org/download/)
+
+Follow these steps to install MinGW-w64 for Windows: https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain
+
+Change the default compiler to use in CMakeList.txt to the following:
+```cmake
+set(CMAKE_CXX_COMPILER gcc)
+```
+Once complete, continue in Powershell:
+
+```zsh
+git clone https://github.com/npxtune/chisel8.git
+cd chisel8
+git submodule update --init --recursive   # To fetch raylib & raygui
+mkdir build && cd ./build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j 6 # '6' -> How many cores you want to use
+```
+
+There should now be an executable called `chisel8.exe` in your build folder.
+Run it and the application should open.
 
 ---
 #### Copyright & Licensing

@@ -128,6 +128,7 @@ void main_window(options_config *config) {
                 /*-------------------------------------------------------------------------------------------------------------*/
 
             case (init):
+                SetExitKey(KEY_NULL);
                 DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.2f));
                 DrawText("Please drag a ROM file into the window",
                          GetScreenWidth() / 2 - (scale.font_size * 10) + (scale.font_size / 2),
@@ -135,8 +136,9 @@ void main_window(options_config *config) {
 
                 if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 6),
                                            scale.button_width, scale.button_height},
-                              GuiIconText(ICON_REREDO_FILL, "Return"))) {
+                              GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
                     menu_state = normal;
+                    SetExitKey(KEY_ESCAPE);
                     break;
                 }
                 if (IsFileDropped()) {  // Initialize Emulation
