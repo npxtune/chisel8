@@ -34,7 +34,6 @@ void emu_stop(emu *chip8, AudioStream beep) {
     UnloadTexture(chip8->display);
     ClearBackground(BLACK);
     TraceLog(LOG_INFO, "EMU_MAIN -> Stopped emulation");
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetExitKey(KEY_ESCAPE);
 }
 

@@ -61,8 +61,7 @@ typedef struct Chip8 {
     uint8_t delay, sound; // Delay and sound timers
     uint8_t ram[RAM_SIZE], reg[REGISTER_SIZE + 1];
     uint16_t stack[STACK_SIZE];
-    uint16_t pc, I;
-    uint16_t opcode;
+    uint16_t pc, I, opcode;
 
     int16_t key, i_stack;
 

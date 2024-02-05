@@ -163,6 +163,8 @@ float temp;
 
 int32_t options_window(options_config *config, ui_scale *scale) {
 
+    SetExitKey(KEY_NULL);
+
     DrawText("Settings", GetScreenWidth() / 2 - (scale->font_size * 2), (GetScreenHeight() / 12),
              scale->font_size, RAYWHITE);
 
@@ -179,7 +181,8 @@ int32_t options_window(options_config *config, ui_scale *scale) {
 
     if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 6),
                                scale->button_width, scale->button_height},
-                  GuiIconText(ICON_REREDO_FILL, "Return"))) {
+                  GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
+        SetExitKey(KEY_ESCAPE);
         return 0;
     }
     return 1;
