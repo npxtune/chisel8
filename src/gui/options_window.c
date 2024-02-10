@@ -179,11 +179,25 @@ int32_t options_window(options_config *config, ui_scale *scale) {
 
     GuiColorPicker((Rectangle) {600, 175, 200, 200}, "TEXT", &config->pixel_color);
 
+    GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 3),
+                                 scale->button_width/8, scale->button_width/8}, "Show Debug info", &config->show_debug);
+
+    GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2),
+                             scale->button_width/8, scale->button_width/8}, "Show FPS", &config->show_fps);
+
+
     if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 6),
                                scale->button_width, scale->button_height},
                   GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
         SetExitKey(KEY_ESCAPE);
         return 0;
     }
+
+    if (config->show_debug == true) {
+        SetTraceLogLevel(LOG_INFO);
+    } else {
+        SetTraceLogLevel(LOG_ERROR);
+    }
+
     return 1;
 }
