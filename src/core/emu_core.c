@@ -259,9 +259,8 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                 case (0x33):
                     N1 = chip8->reg[X];
                     chip8->ram[(chip8->I) % RAM_SIZE] = N1 / 100;
-                    chip8->ram[(chip8->I + 1) % RAM_SIZE] = N1 % (((chip8->ram[(chip8->I) % RAM_SIZE]) * 100)) / 10;
-                    chip8->ram[(chip8->I + 2) % RAM_SIZE] = N1 % (((chip8->ram[(chip8->I) % RAM_SIZE]) * 100 +
-                                                                   (chip8->ram[(chip8->I + 1) % RAM_SIZE]) * 10));
+                    chip8->ram[(chip8->I + 1) % RAM_SIZE] = (N1 % 100) / 10;
+                    chip8->ram[(chip8->I + 2) % RAM_SIZE] = N1 % 10;
                     break;
 
                 case (0x55):

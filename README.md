@@ -86,10 +86,11 @@ the ANGLE dylib files into the `build` dir, so it can load them. Remember to run
 If there are any issues, feel free to open an issue & PR request.
 
 **Requirements:** 
+- Git (https://git-scm.com/)
 - MinGW-w64 (https://www.mingw-w64.org/)
 - CMake (https://cmake.org/download/)
 
-Follow these steps to install MinGW-w64 for Windows: https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain
+**Follow these steps to install MinGW-w64 for Windows:** https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain
 
 Change the default compiler to use in CMakeList.txt to the following:
 ```cmake
@@ -101,7 +102,8 @@ Once complete, continue in Powershell:
 git clone https://github.com/npxtune/chisel8.git
 cd chisel8
 git submodule update --init --recursive   # To fetch raylib & raygui
-mkdir build && cd ./build
+mkdir build
+cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j 6 # '6' -> How many cores you want to use
 ```
