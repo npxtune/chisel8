@@ -4,7 +4,7 @@ project(chisel8 C)
 
 #   SET C STANDARD, COMPILER AND OPENGL VERSION
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_COMPILER clang)
+#set(CMAKE_CXX_COMPILER clang)  #   MAYBE NOT NEEDED?
 option(ANGLE "Enable ANGLE support")
 
 if (NOT CMAKE_BUILD_TYPE)

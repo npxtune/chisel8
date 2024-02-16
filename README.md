@@ -23,9 +23,12 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 - [X] Settings.txt to change background and pixel color values as well as the display scaling
 - [X] Chip-8 Audio emulation (it's just a beep...)
 - [X] Correct keypad input
-- [ ] Settings panel to change color, display scale and debug/FPS info in the application
+- [X] Settings panel to change color, display scale and debug/FPS info in the application
 - [ ] Loading previous ROM files for quick access via "Load ROM"
-- *Scrapped*: ~~External Debug window to show RAM contents, fetched/executed opcodes etc.~~
+- [ ] Custom Font support (via external binary file or other means)
+
+    
+**Scrapped**: ~~External Debug window to show RAM contents, fetched/executed opcodes etc.~~
 
 ```
 Please report any bugs via GitHub on the issue page. Thank you!
@@ -82,20 +85,16 @@ the ANGLE dylib files into the `build` dir, so it can load them. Remember to run
 
 ---
 ### Windows
-**WARNING:**    I do not own a device that runs on Windows. These instructions might not work.
+**Info:**    I do not own a device that runs on Windows. These instructions might not work.
 If there are any issues, feel free to open an issue & PR request.
 
 **Requirements:** 
-- Git (https://git-scm.com/)
-- MinGW-w64 (https://www.mingw-w64.org/)
-- CMake (https://cmake.org/download/)
+1. Git (https://git-scm.com/)
+2. MinGW-w64 (https://www.mingw-w64.org/)
+3. CMake (https://cmake.org/download/)
 
 **Follow these steps to install MinGW-w64 for Windows:** https://code.visualstudio.com/docs/cpp/config-mingw#_installing-the-mingww64-toolchain
 
-Change the default compiler to use in CMakeList.txt to the following:
-```cmake
-set(CMAKE_CXX_COMPILER gcc)
-```
 Once complete, continue in Powershell:
 
 ```zsh
