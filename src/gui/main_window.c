@@ -84,10 +84,12 @@ void main_window(options_config *config) {
             GuiSetIconScale((int32_t) (scale.font_size / 1.8) / 16);
         }
 
-        if (IsFileDropped()) {  // Initialize Emulation
+        if (IsFileDropped() && menu_state != options) {  // Initialize Emulation
             EndDrawing();
             if (emu_main(config, &scale) == -2) { break; }
             menu_state = normal;
+        } else {
+            UnloadDroppedFiles(LoadDroppedFiles());
         }
 
         SetWindowTitle(WINDOW_TITLE VERSION);
@@ -100,7 +102,7 @@ void main_window(options_config *config) {
 
                 if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() / 2 - GetScreenHeight() / 6 - 10,
                                            scale.button_width, scale.button_height},
-                              GuiIconText(ICON_CPU, "Load ROM"))) {
+                              GuiIconText(ICON_ROM, "Load ROM"))) {
                     menu_state = init;
                 }
 
@@ -108,6 +110,13 @@ void main_window(options_config *config) {
                                            scale.button_width, scale.button_height},
                               GuiIconText(ICON_GEAR, "Settings"))) {
                     menu_state = options;
+                }
+
+                if (GuiButton((Rectangle) {GetScreenWidth() - scale.button_height * 1.5,
+                                           GetScreenHeight() - scale.button_height * 1.5,
+                                           scale.button_height, scale.button_height},
+                              GuiIconText(ICON_INFO, ""))) {
+                    OpenURL("https://github.com/npxtune/chisel8");
                 }
 
                 if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 6),
@@ -134,7 +143,7 @@ void main_window(options_config *config) {
                          GetScreenWidth() / 2 - (scale.font_size * 10) + (scale.font_size / 2),
                          (GetScreenHeight() / 2) - scale.font_size * 1.5, scale.font_size, RAYWHITE);
 
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 6),
+                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 8),
                                            scale.button_width, scale.button_height},
                               GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
                     menu_state = normal;

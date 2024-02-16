@@ -38,6 +38,11 @@
 
 #define items 6     // How many options are configurable?
 
+enum menu_state_counter {
+    main, theme, miscellaneous
+};
+uint32_t menu_state = main;
+
 void create_config(options_config *config) {
     FILE *file = fopen("./chisel8-settings.txt", "w");
 
@@ -162,42 +167,91 @@ int32_t write_settings(options_config *config) {
 float temp;
 
 int32_t options_window(options_config *config, ui_scale *scale) {
+    switch (menu_state) {
 
-    SetExitKey(KEY_NULL);
+        /*-------------------------------------------------------------------------------------------------------------*/
 
-    DrawText("Settings", GetScreenWidth() / 2 - (scale->font_size * 2), (GetScreenHeight() / 12),
-             scale->font_size, RAYWHITE);
+        case main:
+            SetExitKey(KEY_NULL);
 
-    //      AUDIO VOLUME SLIDER
-    GuiSliderBar((Rectangle) {(scale->window_width / 2) - 250, scale->window_height / 4, 500, 25},
-                 GuiIconText(ICON_AUDIO, "Volume "),
-                 TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
+            DrawText("Settings", GetScreenWidth() / 2 - (scale->font_size * 2), (GetScreenHeight() / 12),
+                     scale->font_size, RAYWHITE);
 
-    //  TODO: THIS IS VERY BROKEN!!!        HIDE COLOR PICKER BEHIND BUTTON?
+            //      AUDIO VOLUME SLIDER
+            GuiSliderBar((Rectangle) {(scale->window_width / 2) - 250, scale->window_height / 4, 500, 25},
+                         GuiIconText(ICON_AUDIO, "Volume "),
+                         TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
 
-    GuiColorPicker((Rectangle) {100, 175, 200, 200}, "TEXT", &config->background_color);
+            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 1.7),
+                                       scale->button_width, scale->button_height},
+                          GuiIconText(ICON_BRUSH_PAINTER, "Change color theme"))) {
+                //  COLOR MENU
+                menu_state = theme;
+            }
 
-    GuiColorPicker((Rectangle) {600, 175, 200, 200}, "TEXT", &config->pixel_color);
+            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2.2),
+                                       scale->button_width, scale->button_height},
+                          GuiIconText(ICON_GEAR_EX, "Miscellaneous"))) {
+                //  OTHER SETTINGS
+                menu_state = miscellaneous;
+            }
 
-    GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 3),
-                                 scale->button_width/8, scale->button_width/8}, "Show Debug info", &config->show_debug);
+            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
+                                       scale->button_width, scale->button_height},
+                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
+                SetExitKey(KEY_ESCAPE);
+                return 0;
+            }
+            break;
 
-    GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2),
-                             scale->button_width/8, scale->button_width/8}, "Show FPS", &config->show_fps);
+            /*-------------------------------------------------------------------------------------------------------------*/
+
+        case theme:
+            DrawText("Color Theme", GetScreenWidth() / 2 - (scale->font_size * 2) - 50, (GetScreenHeight() / 12),
+                     scale->font_size, RAYWHITE);
+
+            DrawText("Background Color:", 115, 175 - 40, 20, WHITE);
+            GuiColorPicker((Rectangle) {100, 175, 200, 200}, "BG Color", &config->background_color);
+
+            DrawText("Pixel Color:", 645, 175 - 40, 20, WHITE);
+            GuiColorPicker((Rectangle) {600, 175, 200, 200}, "FG Color", &config->pixel_color);
+
+            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
+                                       scale->button_width, scale->button_height},
+                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
+                menu_state = main;
+            }
+            break;
+
+            /*-------------------------------------------------------------------------------------------------------------*/
+
+        case miscellaneous:
+            DrawText("Miscellaneous", GetScreenWidth() / 2 - (scale->font_size * 2) - 50, (GetScreenHeight() / 12),
+                     scale->font_size, RAYWHITE);
+
+            GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 1.7),
+                                     scale->button_width / 8, scale->button_width / 8}, "Show Debug info",
+                        &config->show_debug);
+
+            GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2.2),
+                                     scale->button_width / 8, scale->button_width / 8}, "Show FPS", &config->show_fps);
 
 
-    if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 6),
-                               scale->button_width, scale->button_height},
-                  GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
-        SetExitKey(KEY_ESCAPE);
-        return 0;
+            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
+                                       scale->button_width, scale->button_height},
+                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
+                menu_state = main;
+            }
+
+            if (config->show_debug == true) {
+                SetTraceLogLevel(LOG_INFO);
+            } else {
+                SetTraceLogLevel(LOG_ERROR);
+            }
+            break;
+
+            /*-------------------------------------------------------------------------------------------------------------*/
+
     }
-
-    if (config->show_debug == true) {
-        SetTraceLogLevel(LOG_INFO);
-    } else {
-        SetTraceLogLevel(LOG_ERROR);
-    }
-
     return 1;
 }
