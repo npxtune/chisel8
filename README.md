@@ -1,6 +1,7 @@
 # ![ICON](pictures/icon.png) chisel8
 Compact Hexadecimal Interpretive Programming – 8-bit (Chip-8 Interpreter), written in C with use of the [Raylib](https://github.com/raysan5/raylib) and [Raygui](https://github.com/raysan5/raygui) libraries.
-Special thanks to everyone in the [EmuDev Discord Server](https://discord.com/invite/7nuaqZ2) that helped out with fixing some issues and handling undefined behaviour.
+Special thanks to everyone in the [EmuDev Discord Server](https://discord.com/invite/7nuaqZ2) that helped out with fixing some issues and handling undefined behaviour, as well as
+the test ROMS from [Timendus's Chip8 test suite](https://github.com/Timendus/chip8-test-suite).
 
 ### Pictures
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
