@@ -178,7 +178,9 @@ int32_t options_window(options_config *config, ui_scale *scale) {
                      scale->font_size, RAYWHITE);
 
             //      AUDIO VOLUME SLIDER
-            GuiSliderBar((Rectangle) {(scale->window_width / 2) - 250, scale->window_height / 4, 500, 25},
+            GuiSliderBar((Rectangle) {scale->button_x - scale->button_width / 1.45,
+                                      GetScreenHeight() - (GetScreenHeight() / 1.3), scale->button_width * 2.5,
+                                      scale->button_height / 1.5},
                          GuiIconText(ICON_AUDIO, "Volume "),
                          TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
 
@@ -210,10 +212,10 @@ int32_t options_window(options_config *config, ui_scale *scale) {
             DrawText("Color Theme", GetScreenWidth() / 2 - (scale->font_size * 2) - 50, (GetScreenHeight() / 12),
                      scale->font_size, RAYWHITE);
 
-            DrawText("Background Color:", 115, 175 - 40, 20, WHITE);
+            DrawText("Background Color:", 115, 175 - 40, scale->font_size / 1.5, WHITE);
             GuiColorPicker((Rectangle) {100, 175, 200, 200}, "BG Color", &config->background_color);
 
-            DrawText("Pixel Color:", 645, 175 - 40, 20, WHITE);
+            DrawText("Pixel Color:", 645, 175 - 40, scale->font_size / 1.5, WHITE);
             GuiColorPicker((Rectangle) {600, 175, 200, 200}, "FG Color", &config->pixel_color);
 
             if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
