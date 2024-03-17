@@ -35,17 +35,18 @@
 #include "gui/main_window.h"
 
 void main_window(options_config *config) {
-    ui_scale scale;
 
-    //  Show debug info?
-    if (config->show_debug == true) {
+    if (config->show_debug == true) {    //  Show debug info?
         SetTraceLogLevel(LOG_INFO);
     } else {
-        SetTraceLogLevel(LOG_ERROR);
+        SetTraceLogLevel(LOG_WARNING);
     }
 
+    ui_scale scale;
     scale.window_width = DISPLAY_WIDTH * config->display_scaling;
     scale.window_height = DISPLAY_HEIGHT * config->display_scaling;
+    scale.emu_width = DISPLAY_WIDTH * config->display_scaling;
+    scale.emu_height = DISPLAY_HEIGHT * config->display_scaling;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
@@ -57,108 +58,102 @@ void main_window(options_config *config) {
 
     scale.font_size = (GetScreenHeight() / (int32_t) config->display_scaling);
     GuiLoadStyleDark();
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 1023);   //  Set window box colour, no idea what the value is, but it works
 
-    enum menu_state_counter {
-        normal, options, init
-    };
-    uint32_t menu_state = normal;
+    bool is_options = false;
 
     SetTargetFPS(REFRESH_RATE);
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
 
+        //----------------------------------------------------------------------------------
+        //  WINDOW EVENTS
+        //----------------------------------------------------------------------------------
+
+        if (IsKeyPressed(KEY_F11)) {
+            if (!IsWindowFullscreen()) {
+                SetWindowSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
+                ToggleFullscreen();
+            } else {
+                ToggleFullscreen();
+                SetWindowSize(scale.window_width, scale.window_height);
+            }
+        }
+
         if (IsWindowResized()) {    //  Magic to enable dynamic scaling
             config->display_scaling = (uint32_t) fminf(GetScreenWidth() / (float) DISPLAY_WIDTH,
                                                        GetScreenHeight() / (float) DISPLAY_HEIGHT);
 
-            scale.window_width = DISPLAY_WIDTH * config->display_scaling;
-            scale.window_height = DISPLAY_HEIGHT * config->display_scaling;
+            if (!IsWindowFullscreen()) {
+                scale.window_width = GetScreenWidth();
+                scale.window_height = GetScreenHeight();
+            }
+
+            scale.emu_width = DISPLAY_WIDTH * config->display_scaling;
+            scale.emu_height = DISPLAY_HEIGHT * config->display_scaling;
 
             scale.button_width = (float) (GetScreenWidth() / 4.8);
             scale.button_height = (float) ((float) GetScreenHeight() / 16);
             scale.button_x = (float) ((float) GetScreenWidth() / 2 - (GetScreenWidth() / 9.6));
-            scale.font_size = (scale.window_width / scale.window_height) * (int32_t) config->display_scaling;
+            scale.font_size = (scale.emu_width / scale.emu_height) * (int32_t) config->display_scaling;
 
             GuiSetStyle(DEFAULT, TEXT_SIZE, (int32_t) (scale.font_size / 1.8));
             GuiSetIconScale((int32_t) (scale.font_size / 1.8) / 16);
         }
 
-        if (IsFileDropped() && menu_state != options) {  // Initialize Emulation
+        if (IsFileDropped()) {  // Initialize Emulation
             EndDrawing();
             if (emu_main(config, &scale) == -2) { break; }
-            menu_state = normal;
-        } else {
-            UnloadDroppedFiles(LoadDroppedFiles());
         }
-
         SetWindowTitle(WINDOW_TITLE VERSION);
 
-        switch (menu_state) {
-            /*-------------------------------------------------------------------------------------------------------------*/
-            case (normal):
-                DrawText("Chisel8 Emulator", GetScreenWidth() / 2 - (scale.font_size * 4), (GetScreenHeight() / 12),
-                         scale.font_size, RAYWHITE);
+        //----------------------------------------------------------------------------------
+        //  RENDER LOGIC
+        //----------------------------------------------------------------------------------
 
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() / 2 - GetScreenHeight() / 6 - 10,
-                                           scale.button_width, scale.button_height},
-                              GuiIconText(ICON_ROM, "Load ROM"))) {
-                    menu_state = init;
-                }
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.2f));
+        DrawText("Please drag a ROM file into the window",
+                 GetScreenWidth() / 2 - (scale.font_size * 10) + (scale.font_size / 2),
+                 (GetScreenHeight() / 2) - scale.font_size, scale.font_size, RAYWHITE);
 
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() / 2 - GetScreenHeight() / 16,
-                                           scale.button_width, scale.button_height},
-                              GuiIconText(ICON_GEAR, "Settings"))) {
-                    menu_state = options;
-                }
+        if (GuiButton((Rectangle) {GetScreenWidth() - scale.button_height * 4.5,
+                                   GetScreenHeight() - scale.button_height * 1.5,
+                                   scale.button_height, scale.button_height},
+                      GuiIconText(ICON_INFO, ""))) {
+            OpenURL("https://github.com/npxtune/chisel8");
+        }
 
-                if (GuiButton((Rectangle) {GetScreenWidth() - scale.button_height * 1.5,
-                                           GetScreenHeight() - scale.button_height * 1.5,
-                                           scale.button_height, scale.button_height},
-                              GuiIconText(ICON_INFO, ""))) {
-                    OpenURL("https://github.com/npxtune/chisel8");
-                }
+        if (GuiButton((Rectangle) {GetScreenWidth() - scale.button_height * 3,
+                                   GetScreenHeight() - scale.button_height * 1.5,
+                                   scale.button_height, scale.button_height},
+                      GuiIconText(ICON_GEAR, "")) || IsKeyPressed(KEY_S)) {
+            if (is_options) {
+                is_options = false;
+            } else {
+                is_options = true;
+            }
+        }
 
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 6),
-                                           scale.button_width, scale.button_height},
-                              GuiIconText(ICON_EXIT, "Quit"))) {
-                    EndDrawing();
-                    CloseWindow();
-                    return;
-                }
-                break;
+        if (GuiButton((Rectangle) {GetScreenWidth() - scale.button_height * 1.5,
+                                   GetScreenHeight() - scale.button_height * 1.5,
+                                   scale.button_height, scale.button_height},
+                      GuiIconText(ICON_EXIT, ""))) {
+            EndDrawing();
+            CloseWindow();
+            return;
+        }
 
-                /*-------------------------------------------------------------------------------------------------------------*/
-
-            case (options):
-                menu_state = options_window(config, &scale);
-                break;
-
-                /*-------------------------------------------------------------------------------------------------------------*/
-
-            case (init):
-                SetExitKey(KEY_NULL);
-                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.2f));
-                DrawText("Please drag a ROM file into the window",
-                         GetScreenWidth() / 2 - (scale.font_size * 10) + (scale.font_size / 2),
-                         (GetScreenHeight() / 2) - scale.font_size * 1.5, scale.font_size, RAYWHITE);
-
-                if (GuiButton((Rectangle) {scale.button_x, GetScreenHeight() - (GetScreenHeight() / 8),
-                                           scale.button_width, scale.button_height},
-                              GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
-                    menu_state = normal;
-                    SetExitKey(KEY_ESCAPE);
-                    break;
-                }
-                if (IsFileDropped()) {  // Initialize Emulation
-                    EndDrawing();
-                    if (emu_main(config, &scale) == -2) { break; }
-                    menu_state = normal;
-                    break;
-                }
-                break;
-
-                /*-------------------------------------------------------------------------------------------------------------*/
+        if (is_options) {
+            SetExitKey(KEY_NULL);
+            if (GuiWindowBox((Rectangle) {(GetScreenWidth() / 5) / 2, (GetScreenHeight() / 5) / 2,
+                                          GetScreenWidth() - GetScreenWidth() / 5,
+                                          GetScreenHeight() - GetScreenHeight() / 4.5}, "")) {
+                is_options = false;
+            }
+            options_window(config, &scale) != 0 ? is_options = false : 0;
+        } else {
+            SetExitKey(KEY_ESCAPE);
         }
         EndDrawing();
     }

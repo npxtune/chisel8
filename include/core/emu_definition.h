@@ -35,7 +35,7 @@
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
 #define REFRESH_RATE 60
-#define CLOCK_RATE 700
+#define CLOCK_RATE 600
 
 // FONT
 static uint8_t FONT[FONT_SIZE] = {

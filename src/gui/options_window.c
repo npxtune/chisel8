@@ -27,233 +27,98 @@
 #include "gui/options_window.h"
 #include "raygui.h"
 
-//  DEFAULT SETTINGS VALUES
+bool is_theme = true, is_misc = false;
 
-#define color_0     "  0,  0,  0, 1;    # Background color\n"       // Default color is BLACK
-#define color_1     "255,255,255, 1;    # Pixel color\n"            // Default color is WHITE
-#define scaling       "15;                # Display scaling, Chip8 Display -> 32x64 Pixels\n"
-#define debug       "false;             # Show debugging info in terminal\n"
-#define fps         "false;             # Show Frames per Second in the top left\n"
-#define audio       "0.50;               # Set the volume of the Chip-8's beep\n"
-
-#define items 6     // How many options are configurable?
-
-enum menu_state_counter {
-    main, theme, miscellaneous
-};
-uint32_t menu_state = main;
-
-void create_config(options_config *config) {
-    FILE *file = fopen("./chisel8-settings.txt", "w");
-
-    fwrite(color_0, strlen(color_0), 1, file);
-    fwrite(color_1, strlen(color_1), 1, file);
-    fwrite(scaling, strlen(scaling), 1, file);
-    fwrite(debug, strlen(debug), 1, file);
-    fwrite(fps, strlen(fps), 1, file);
-    fwrite(audio, strlen(audio), 1, file);
-
+void load_settings(options_config *config) {
     config->background_color = BLACK;
     config->pixel_color = WHITE;
     config->display_scaling = 15;
     config->show_debug = false;
     config->show_fps = false;
-    config->volume = 0.50f;
-
-    fclose(file);
+    config->volume = 0.25f;
 }
-
-void load_settings(options_config *config) {
-    FILE *file = fopen("./chisel8-settings.txt", "r");
-    if (file != NULL) {
-        // READ OPTIONS
-        char line[100];
-        int32_t temp;
-        for (int32_t i = 0; i < items; ++i) {
-            fgets(line, 100, file);
-            uint16_t color[4] = {0, 0, 0, 0};
-            uint32_t counter = 0;
-
-            // Skip line if it is not a value
-            if (line[0] == '#' || line[0] == '\n' || line[0] == EOF) {
-                i -= 1;
-                continue;
-            }
-
-            switch (i) {
-                case 0:
-                    for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isdigit(line[j]) && color[counter] > 0) {
-                            color[counter] = (color[counter] * 10) + line[j] - '0';
-                        } else if (isdigit(line[j])) {
-                            color[counter] = line[j] - '0';
-                        }
-                        if (line[j] == ',') {
-                            counter++;
-                        }
-                    }
-                    config->background_color = (Color) {color[0], color[1], color[2], color[3] * 255};
-                    break;
-
-                case 1:
-                    for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isdigit(line[j]) && color[counter] > 0) {
-                            color[counter] = (color[counter] * 10) + line[j] - '0';
-                        } else if (isdigit(line[j])) {
-                            color[counter] = line[j] - '0';
-                        }
-                        if (line[j] == ',') {
-                            counter++;
-                        }
-                    }
-                    config->pixel_color = (Color) {color[0], color[1], color[2], color[3] * 255};
-                    break;
-
-                case 2:
-                    for (int32_t j = 0; line[j] != ';'; ++j) {
-                        if (isdigit(line[j]) && color[0] > 0) {
-                            color[0] = (color[0] * 10) + line[j] - '0';
-                        } else if (isdigit(line[j])) {
-                            color[0] = line[j] - '0';
-                        }
-                    }
-                    config->display_scaling = color[0];
-                    break;
-
-                case 3:
-                    for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if (strncmp(&line[0], "true", sizeof(line[temp])) == 0) {
-                        config->show_debug = true;
-                    } else {
-                        config->show_debug = false;
-                    }
-                    break;
-
-                case 4:
-                    for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if (strncmp(&line[0], "true", sizeof(line[temp])) == 0) {
-                        config->show_fps = true;
-                    } else {
-                        config->show_fps = false;
-                    }
-                    break;
-
-                case 5:
-                    for (temp = 0; line[temp] != ';'; ++temp) {}
-                    if (strncmp(&line[0], "0.", sizeof(line[temp])) == 0) {
-                        config->volume = (float) (line[2] - '0') / 10 + (float) (line[3] - '0') / 100;
-                    } else {
-                        config->volume = 1.0f;
-                    }
-                    break;
-
-                default:
-                    fclose(file);
-                    return;
-            }
-        }
-    } else {
-        // CREATE OPTIONS
-        create_config(config);
-    }
-    fclose(file);
-}
-
-int32_t write_settings(options_config *config) {
-    //  TODO
-    return 0;
-}
-
-float temp;
 
 int32_t options_window(options_config *config, ui_scale *scale) {
-    switch (menu_state) {
+    SetExitKey(KEY_NULL);
 
-        /*-------------------------------------------------------------------------------------------------------------*/
+//    if (fileDialogState.windowActive) GuiLock();
 
-        case main:
-            SetExitKey(KEY_NULL);
+    //      AUDIO VOLUME SLIDER
+    GuiSliderBar((Rectangle) {scale->button_x - scale->button_width / 1.45,
+                              GetScreenHeight() - (GetScreenHeight() / 1.3), scale->button_width * 2.5,
+                              scale->button_height / 1.5},
+                 GuiIconText(ICON_AUDIO, "Volume "),
+                 TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
 
-            DrawText("Settings", GetScreenWidth() / 2 - (scale->font_size * 2), (GetScreenHeight() / 12),
-                     scale->font_size, RAYWHITE);
-
-            //      AUDIO VOLUME SLIDER
-            GuiSliderBar((Rectangle) {scale->button_x - scale->button_width / 1.45,
-                                      GetScreenHeight() - (GetScreenHeight() / 1.3), scale->button_width * 2.5,
-                                      scale->button_height / 1.5},
-                         GuiIconText(ICON_AUDIO, "Volume "),
-                         TextFormat("%d %%", (int32_t) (config->volume * 100)), &config->volume, 0, 1);
-
-            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 1.7),
-                                       scale->button_width, scale->button_height},
-                          GuiIconText(ICON_BRUSH_PAINTER, "Change color theme"))) {
-                //  COLOR MENU
-                menu_state = theme;
-            }
-
-            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2.2),
-                                       scale->button_width, scale->button_height},
-                          GuiIconText(ICON_GEAR_EX, "Miscellaneous"))) {
-                //  OTHER SETTINGS
-                menu_state = miscellaneous;
-            }
-
-            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
-                                       scale->button_width, scale->button_height},
-                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
-                SetExitKey(KEY_ESCAPE);
-                return 0;
-            }
-            break;
-
-            /*-------------------------------------------------------------------------------------------------------------*/
-
-        case theme:
-            DrawText("Color Theme", GetScreenWidth() / 2 - (scale->font_size * 2) - 50, (GetScreenHeight() / 12),
-                     scale->font_size, RAYWHITE);
-
-            DrawText("Background Color:", 115, 175 - 40, scale->font_size / 1.5, WHITE);
-            GuiColorPicker((Rectangle) {100, 175, 200, 200}, "BG Color", &config->background_color);
-
-            DrawText("Pixel Color:", 645, 175 - 40, scale->font_size / 1.5, WHITE);
-            GuiColorPicker((Rectangle) {600, 175, 200, 200}, "FG Color", &config->pixel_color);
-
-            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
-                                       scale->button_width, scale->button_height},
-                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
-                menu_state = main;
-            }
-            break;
-
-            /*-------------------------------------------------------------------------------------------------------------*/
-
-        case miscellaneous:
-            DrawText("Miscellaneous", GetScreenWidth() / 2 - (scale->font_size * 2) - 50, (GetScreenHeight() / 12),
-                     scale->font_size, RAYWHITE);
-
-            GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 1.7),
-                                     scale->button_width / 8, scale->button_width / 8}, "Show Debug info",
-                        &config->show_debug);
-
-            GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2.2),
-                                     scale->button_width / 8, scale->button_width / 8}, "Show FPS", &config->show_fps);
-
-
-            if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 8),
-                                       scale->button_width, scale->button_height},
-                          GuiIconText(ICON_REREDO_FILL, "Return")) || IsKeyPressed(KEY_ESCAPE)) {
-                menu_state = main;
-            }
-
-            if (config->show_debug == true) {
-                SetTraceLogLevel(LOG_INFO);
-            } else {
-                SetTraceLogLevel(LOG_ERROR);
-            }
-            break;
-
-            /*-------------------------------------------------------------------------------------------------------------*/
-
+    if (GuiButton((Rectangle) {scale->button_x / 3,
+                               GetScreenHeight() - (GetScreenHeight() / 1.7),
+                               scale->button_height * 1.5, scale->button_height * 1.5},
+                  GuiIconText(ICON_BRUSH_PAINTER, ""))) {
+        //  COLOR MENU
+        is_theme = true, is_misc = false;
     }
-    return 1;
+
+    if (GuiButton((Rectangle) {scale->button_x / 3,
+                               GetScreenHeight() - (GetScreenHeight() / 2.2),
+                               scale->button_height * 1.5, scale->button_height * 1.5},
+                  GuiIconText(ICON_GEAR_EX, ""))) {
+        //  OTHER SETTINGS
+        is_misc = true, is_theme = false;
+    }
+
+//    if (GuiButton((Rectangle) {scale->button_x / 3,
+//                               GetScreenHeight() - (GetScreenHeight() / 3.1),
+//                               scale->button_height * 1.5, scale->button_height * 1.5},
+//                  GuiIconText(ICON_FILE_SAVE_CLASSIC, ""))) {
+//        //  save settings?
+//    }
+
+    if (is_theme) {
+        DrawText("Background Color:", scale->button_x - (scale->font_size * 4) + (scale->font_size / 2),
+                 GetScreenHeight() / 2 - scale->font_size * 2, scale->font_size / 1.5, WHITE);
+
+        GuiColorPicker((Rectangle) {scale->button_x - scale->button_width / 2, GetScreenHeight() / 2.2,
+                                    scale->button_width / 1.5, scale->button_width / 1.5}, "BG Color",
+                       &config->background_color);
+
+        DrawText("Pixel Color:", scale->button_x * 1.85 - (scale->font_size * 4) + (scale->font_size / 2),
+                 GetScreenHeight() / 2 - scale->font_size * 2, scale->font_size / 1.5, WHITE);
+
+        GuiColorPicker((Rectangle) {scale->button_x + scale->button_width, GetScreenHeight() / 2.2,
+                                    scale->button_width / 1.5, scale->button_width / 1.5}, "FG Color",
+                       &config->pixel_color);
+    }
+
+    if (is_misc) {
+        GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 1.7),
+                                 scale->button_width / 8, scale->button_width / 8}, "Show Debug info",
+                    &config->show_debug);
+
+        GuiCheckBox((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 2.2),
+                                 scale->button_width / 8, scale->button_width / 8}, "Show FPS", &config->show_fps);
+
+        //  CUSTOM FONT LOADING?
+//        if (GuiButton((Rectangle) {scale->button_x, GetScreenHeight() - (GetScreenHeight() / 3.2),
+//                                   scale->button_width, scale->button_width / 8}, "Custom FONT binary")) {
+//            ClearWindowState(FLAG_WINDOW_RESIZABLE);
+//            fileDialogState = InitGuiWindowFileDialog(GetWorkingDirectory());
+//            fileDialogState.windowActive = true;
+//            config->is_dialog = true;
+//        }
+//
+//        GuiUnlock();
+//        GuiWindowFileDialog(&fileDialogState);
+
+        if (config->show_debug == true) {
+            SetTraceLogLevel(LOG_INFO);
+        } else {
+            SetTraceLogLevel(LOG_WARNING);
+        }
+    }
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        SetExitKey(KEY_ESCAPE);
+        return -1;
+    }
+    return 0;
 }
