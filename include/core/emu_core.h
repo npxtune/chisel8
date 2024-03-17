@@ -31,5 +31,6 @@
 #include "core/emu_definition.h"
 #include "gui/options_window.h"
 
+int32_t undefined(int32_t instruct);
 int32_t fetch(emu *chip8);
 int32_t decode_exec(emu *chip, options_config *config);

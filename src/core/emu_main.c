@@ -70,8 +70,6 @@ void check_input(emu *chip8) {      //  I'm sorry, I tried it with a switch but 
         chip8->key = 0xb;
     } else if (IsKeyDown(KEY_V)) {
         chip8->key = 0xf;
-    } else {
-        chip8->key = -1;
     }
 }
 
@@ -152,12 +150,27 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
         BeginDrawing();
         ClearBackground(BLACK);
 
+        if (IsKeyPressed(KEY_F11)) {
+            if (!IsWindowFullscreen()) {
+                SetWindowSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
+                ToggleFullscreen();
+            } else {
+                ToggleFullscreen();
+                SetWindowSize(scale->window_width, scale->window_height);
+            }
+        }
+
         if (IsWindowResized()) {    //  Magic to enable dynamic scaling
             config->display_scaling = (uint32_t) fminf(GetScreenWidth() / (float) DISPLAY_WIDTH,
                                                        GetScreenHeight() / (float) DISPLAY_HEIGHT);
 
-            scale->window_width = DISPLAY_WIDTH * config->display_scaling;
-            scale->window_height = DISPLAY_HEIGHT * config->display_scaling;
+            if (!IsWindowFullscreen()) {
+                scale->window_width = GetScreenWidth();
+                scale->window_height = GetScreenHeight();
+            }
+
+            scale->emu_width = DISPLAY_WIDTH * config->display_scaling;
+            scale->emu_height = DISPLAY_HEIGHT * config->display_scaling;
 
             scale->button_width = (float) (GetScreenWidth() / 4.8);
             scale->button_height = (float) ((float) GetScreenHeight() / 16);
@@ -172,33 +185,36 @@ int32_t emu_main(options_config *config, ui_scale *scale) {
 
         // Draw Pixels from virtual Texture
         DrawTexturePro(chip8.display, (Rectangle) {0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT},
-                       (Rectangle) {(GetScreenWidth() - scale->window_width) / 2,
-                                    (GetScreenHeight() - scale->window_height) / 2, scale->window_width,
-                                    scale->window_height}, (Vector2) {0, 0}, 0, WHITE);
+                       (Rectangle) {(GetScreenWidth() - scale->emu_width) / 2,
+                                    (GetScreenHeight() - scale->emu_height) / 2,
+                                    scale->emu_width,
+                                    scale->emu_height}, (Vector2) {0, 0}, 0, WHITE);
 
-        DrawRectangleLines(((GetScreenWidth() - scale->window_width) / 2) - 1,
-                           (((GetScreenHeight() - scale->window_height) / 2)) - 1, scale->window_width + 2,
-                           scale->window_height + 2, DARKGRAY);
+        DrawRectangleLines(((GetScreenWidth() - scale->emu_width) / 2) - 1,
+                           (((GetScreenHeight() - scale->emu_height) / 2)) - 1,
+                           scale->emu_width + 2,
+                           scale->emu_height + 2, DARKGRAY);
 
         if (config->show_fps) {
-            DrawText(TextFormat("%dhz", GetFPS() + 1), (int32_t) config->display_scaling,
+            DrawText(TextFormat("%dhz", GetFPS()), (int32_t) config->display_scaling,
                      (int32_t) config->display_scaling / 2,
                      (int32_t) (scale->font_size / 1.8), DARKGREEN);
         }
 
+        check_input(&chip8);
         for (int32_t i = 0; i < (int32_t) (CLOCK_RATE / REFRESH_RATE); ++i) {
-            check_input(&chip8);
             if (!undefined && fetch(&chip8) == -1) {
                 undefined = true;
-                TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
+                TraceLog(LOG_WARNING, "EMU_MAIN -> Stopping further cycles!");
                 continue;
             }
             if (!undefined && decode_exec(&chip8, config) == -1) {
                 undefined = true;
-                TraceLog(LOG_INFO, "EMU_MAIN -> Pausing emulation!");
+                TraceLog(LOG_WARNING, "EMU_MAIN -> Stopping further cycles!");
                 continue;
             }
         }
+        chip8.key = -1;
 
         if (chip8.delay > 0) {
             chip8.delay -= REFRESH_RATE;

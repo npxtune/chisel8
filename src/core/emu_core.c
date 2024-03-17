@@ -26,8 +26,8 @@
 
 #include "core/emu_core.h"
 
-int32_t undefined(void) {           // Handles undefined behaviour
-    TraceLog(LOG_ERROR, "EMU_CORE -> COULD NOT DECODE INSTRUCTION!");
+int32_t undefined(int32_t opcode) {           // Handles undefined behaviour
+    TraceLog(LOG_ERROR, "EMU_CORE -> COULD NOT DECODE INSTRUCTION %04x!", opcode);
     return -1;
 }
 
@@ -36,7 +36,7 @@ int32_t fetch(emu *chip8) {      // Fetches instruction
     chip8->opcode <<= 8;
     chip8->opcode += chip8->ram[chip8->pc++];
     if (chip8->opcode == 0x0000) {
-        return undefined();
+        return undefined(0x000);
     }
     return 0;
 }
@@ -65,7 +65,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                 chip8->i_stack -= 1;
 
             } else {
-                return undefined();
+                return undefined(chip8->opcode);
             }
             break;
 
@@ -92,13 +92,13 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             break;
 
         case (0x5):
-            if (chip8->reg[X] == chip8->reg[Y]) {
+            if (chip8->reg[X] == chip8->reg[Y] && N1 == 0) {
                 chip8->pc += 2;
             }
             break;
 
         case (0x9):
-            if (chip8->reg[X] != chip8->reg[Y]) {
+            if (chip8->reg[X] != chip8->reg[Y] && N1 == 0) {
                 chip8->pc += 2;
             }
             break;
@@ -184,7 +184,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                     break;
 
                 default:
-                    return undefined();
+                    return undefined(chip8->opcode);
             }
             break;
 
@@ -205,17 +205,15 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             if (N2 == 0x9e) {
                 if (chip8->key == chip8->reg[X]) {
                     chip8->pc += 2;
-                    chip8->key = -1;
                 }
 
             } else if (N2 == 0xa1) {
                 if (chip8->key != chip8->reg[X]) {
                     chip8->pc += 2;
-                    chip8->key = -1;
                 }
 
             } else {
-                return undefined();
+                return undefined(chip8->opcode);
             }
             break;
 
@@ -245,10 +243,10 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                     break;
 
                 case (0x0a):
-                    if (chip8->key != -1) {
-                        chip8->reg[X] = chip8->key;
-                    } else {
+                    if (chip8->key == -1) {
                         chip8->pc -= 2;
+                    } else {
+                        chip8->reg[X] = chip8->key;
                     }
                     break;
 
@@ -276,7 +274,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
                     break;
 
                 default:
-                    return undefined();
+                    return undefined(chip8->opcode);
             }
             break;
 
@@ -315,7 +313,7 @@ int32_t decode_exec(emu *chip8, options_config *config) {
             break;
 
         default:
-            return undefined();
+            return undefined(0x0000);
     }
     return 0;
 }

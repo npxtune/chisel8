@@ -1,4 +1,7 @@
-# ![ICON](pictures/icon.png) chisel8
+<p align="center">
+<img width="512" alt="title" src="pictures/title.png" style="width: 100%; max-width: 512px;">
+</p>
+
 Compact Hexadecimal Interpretive Programming – 8-bit (Chip-8 Interpreter), written in C with use of the [Raylib](https://github.com/raysan5/raylib) and [Raygui](https://github.com/raysan5/raygui) libraries.
 Special thanks to everyone in the [EmuDev Discord Server](https://discord.com/invite/7nuaqZ2) that helped out with fixing some issues and handling undefined behaviour, as well as
 the test ROMS from [Timendus's Chip8 test suite](https://github.com/Timendus/chip8-test-suite).
@@ -6,11 +9,12 @@ the test ROMS from [Timendus's Chip8 test suite](https://github.com/Timendus/chi
 ### Pictures
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
 <img width="1392" alt="Menu" src="pictures/menu.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="settings" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="IBM LOGO" src="pictures/ibm.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/chip8-logo.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="corax+" src="pictures/corax+.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="flags" src="pictures/flags.png" style="width: 30%; max-width: 200px;">
-<img width="1392" alt="settings" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="quirks" src="pictures/quirks.png" style="width: 30%; max-width: 200px;">
 </div>
 
 ---
@@ -21,15 +25,10 @@ Currently, all opcodes are implemented and all of them except for a few work as 
 - [X] MacOS, Linux and Windows platform support. (See: [raylib: supported platforms](https://www.raylib.com/#supported-platforms))
 - [X] Loading of .ch8 ROM files
 - [X] Supports all opcodes for the original [Chip-8](https://emu.gulrak.net/reference/opcodes/) system
-- [X] Settings.txt to change background and pixel color values as well as the display scaling
+- [X] Settings to change background and pixel color values as well as the beep volume
 - [X] Chip-8 Audio emulation (it's just a beep...)
 - [X] Correct keypad input
 - [X] Settings panel to change color, display scale and debug/FPS info in the application
-- [ ] Loading previous ROM files for quick access via "Load ROM"
-- [ ] Custom Font support (via external binary file or other means)
-
-    
-**Scrapped**: ~~External Debug window to show RAM contents, fetched/executed opcodes etc.~~
 
 ```
 Please report any bugs via GitHub on the issue page. Thank you!
@@ -63,11 +62,15 @@ You will now need to provide the ANGLE dylibs in `external/angle-lib/`:
 ```
 File tree:
 
-root/
+chisel8/
 |-- external/
     |-- angle-lib/
         |-- libEGL.dylib
         |-- libGLESv2.dylib
+        
+    |-- raylib-stable/
+    |-- raygui-stable/
+    ...
 ```
 Without these libraries, ANGLE won't be able to be loaded & compiled against.
 If both of these are in their respective directory, you can continue as follows:

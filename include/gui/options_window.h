@@ -27,6 +27,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
@@ -45,6 +46,8 @@ typedef struct Options_config{
 typedef struct Interface_scaling{
     int32_t window_width;
     int32_t window_height;
+    int32_t emu_width;
+    int32_t emu_height;
 
     float button_width;
     float button_height;
@@ -53,7 +56,5 @@ typedef struct Interface_scaling{
     int32_t font_size;
 } ui_scale;
 
-void create_config(options_config *config);
 void load_settings(options_config *config);
-int32_t write_settings(options_config *config);
 int32_t options_window(options_config *config, ui_scale *scale);
