@@ -8,8 +8,8 @@ the test ROMS from [Timendus's Chip8 test suite](https://github.com/Timendus/chi
 
 ### Pictures
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-<img width="1392" alt="Menu" src="pictures/menu.png" style="width: 30%; max-width: 200px;">
-<img width="1392" alt="settings" src="pictures/settings.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="main" src="pictures/main.png" style="width: 30%; max-width: 200px;">
+<img width="1392" alt="config" src="pictures/config.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="IBM LOGO" src="pictures/ibm.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="Chip-8 TTS LOGO" src="pictures/chip8-logo.png" style="width: 30%; max-width: 200px;">
 <img width="1392" alt="corax+" src="pictures/corax+.png" style="width: 30%; max-width: 200px;">
